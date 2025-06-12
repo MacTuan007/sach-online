@@ -8,7 +8,7 @@ export default function ChuDePartial() {
                 <li className="list-group-item"><a className="text-decoration-none"
                  href="/chude/CNTT">Công nghệ thông tin</a></li>
                 <li className="list-group-item"><a className="text-decoration-none"
-                 href="`/chude?chude=${encodeURIComponent(chude)}`">Luật</a></li>
+                 href="`/chude?chude=${encodeURIComponent`">Luật</a></li>
                 <li className="list-group-item"><a className="text-decoration-none"
                  href="/chude/Van-hoc">Văn học</a></li>
                 <li className="list-group-item"><a className="text-decoration-none"
