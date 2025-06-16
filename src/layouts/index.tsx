@@ -25,6 +25,7 @@ export default function Index() {
             </div>
             <br />
             <Footer />
+            
         </>
     );
 }

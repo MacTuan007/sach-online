@@ -1,26 +1,28 @@
+import { Link } from "react-router-dom";
+
 export default function ChuDePartial() {
     return (
         <>
             <ul id="ChuDePartial" className="list-group">
                 <li className="list-group-item active" style={{fontWeight:"bold", textAlign:"center"}}>SÁCH THEO CHỦ ĐỀ</li>
-                <li className="list-group-item"><a className="text-decoration-none"
-                 href="/chude/Ngoai-ngu">Ngoại Ngữ</a></li>
-                <li className="list-group-item"><a className="text-decoration-none"
-                 href="/chude/CNTT">Công nghệ thông tin</a></li>
-                <li className="list-group-item"><a className="text-decoration-none"
-                 href="`/chude?chude=${encodeURIComponent`">Luật</a></li>
-                <li className="list-group-item"><a className="text-decoration-none"
-                 href="/chude/Van-hoc">Văn học</a></li>
-                <li className="list-group-item"><a className="text-decoration-none"
-                 href="/chude/KHKT">Khoa học kỹ thuật</a></li>
-                <li className="list-group-item"><a className="text-decoration-none"
-                 href="/chude/Nong-nghiep">Nông nghiệp</a></li>
-                <li className="list-group-item"><a className="text-decoration-none"
-                 href="/chude/LS-DL">Lịch sử, địa lý</a></li>
-                <li className="list-group-item"><a className="text-decoration-none"
-                 href="/chude/Kinh-te">Kinh Tế</a></li>
-                <li className="list-group-item"><a className="text-decoration-none"
-                 href="/chude/NTS">Nghệ thuật sống</a></li>
+                <li className="list-group-item"><Link className="text-decoration-none"
+                 to= {`/chude?chude=${encodeURIComponent("Ngoại Ngữ")}`}>Ngoại Ngữ</Link></li>
+                <li className="list-group-item"><Link className="text-decoration-none"
+                 to= {`/chude?chude=${encodeURIComponent("Công nghệ thông tin")}`}>Công nghệ thông tin</Link></li>
+                <li className="list-group-item"><Link className="text-decoration-none"
+                 to= {`/chude?chude=${encodeURIComponent("Luật")}`}>Luật</Link></li>
+                <li className="list-group-item"><Link className="text-decoration-none"
+                 to= {`/chude?chude=${encodeURIComponent("Văn học")}`}>Văn học</Link></li>
+                <li className="list-group-item"><Link className="text-decoration-none"
+                 to= {`/chude?chude=${encodeURIComponent("Khoa học kỹ thuật")}`}>Khoa học kỹ thuật</Link></li>
+                <li className="list-group-item"><Link className="text-decoration-none"
+                 to= {`/chude?chude=${encodeURIComponent("Nông nghiệp")}`}>Nông nghiệp</Link></li>
+                <li className="list-group-item"><Link className="text-decoration-none"
+                 to= {`/chude?chude=${encodeURIComponent("Lịch sử, địa lý")}`}>Lịch sử, địa lý</Link></li>
+                <li className="list-group-item"><Link className="text-decoration-none"
+                 to= {`/chude?chude=${encodeURIComponent("Kinh Tế")}`}>Kinh Tế</Link></li>
+                <li className="list-group-item"><Link className="text-decoration-none"
+                 to= {`/chude?chude=${encodeURIComponent("Nghệ thuật sống")}`}>Nghệ thuật sống</Link></li>
             </ul>
         </>
     );

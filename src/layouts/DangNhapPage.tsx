@@ -34,7 +34,9 @@ export default function DangNhap() {
             const KhachHang = Object.values(data)[0] as any;
             const isMatch = await bcrypt.compare(khachhang.password, KhachHang.password);
             if (isMatch) {
-                alert("Đăng nhập thành công!");
+                const emailKey = KhachHang.email.replace(/[^a-zA-Z0-9]/g, '');
+                localStorage.setItem('email', KhachHang.email);
+                localStorage.setItem('emailKey', emailKey);
                 navigate('/');
             } else {
                 alert("Mật khẩu không đúng!");
@@ -48,19 +50,21 @@ export default function DangNhap() {
 
     return (
         <>
-            <div className="container">
-                <h2>ĐĂNG KÝ THÀNH VIÊN</h2>
-                <form onSubmit={handleSubmit}>
-                    <div className="mb-3">
-                        <label htmlFor="username" className="form-label">Tên đăng nhập</label>
-                        <input type="text" className="form-control" id="username" value={khachhang.username} onChange={handleChange} />
-                    </div>
-                    <div className="mb-3">
-                        <label htmlFor="password" className="form-label">Mật khẩu</label>
-                        <input type="password" className="form-control" id="password" value={khachhang.password} onChange={handleChange} />
-                    </div>
-                    <button type="submit" className="btn btn-primary">Đăng Nhập</button>
-                </form>
+            <div className="d-flex justify-content-center align-items-center vh-100">
+                <div className="container" style={{ maxWidth: '400px' }}>
+                    <h2 className="text-center mb-4">Đăng nhập</h2>
+                    <form onSubmit={handleSubmit}>
+                        <div className="mb-3">
+                            <label htmlFor="username" className="form-label">Tên đăng nhập</label>
+                            <input type="text" className="form-control" id="username" value={khachhang.username} onChange={handleChange} />
+                        </div>
+                        <div className="mb-3">
+                            <label htmlFor="password" className="form-label">Mật khẩu</label>
+                            <input type="password" className="form-control" id="password" value={khachhang.password} onChange={handleChange} />
+                        </div>
+                        <button type="submit" className="btn btn-primary">Đăng Nhập</button>
+                    </form>
+                </div>
             </div>
         </>
     );

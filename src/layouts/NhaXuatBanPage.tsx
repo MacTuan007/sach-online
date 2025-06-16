@@ -13,43 +13,43 @@ function useQuery() {
   return new URLSearchParams(useLocation().search)
 }
 
-export default function ChuDePage() {
-  const chude = useQuery().get('chude') || '';
-  const [sachList, setSachList] = useState<Sach[]>([]);
-  if (!chude) {
+export default function NhaXuatBanPage() {
+  const NXB  = useQuery().get('NXB') || '';
+  const [NXBList, setNXBList] = useState<Sach[]>([]);
+  if (!NXB) {
     useEffect(() => {
-      const sachRef = ref(db, `Sach`);
-      const unsubscribe = onValue(sachRef, (snapshot) => {
+      const NXBRef = ref(db, `Sach`);
+      const unsubscribe = onValue(NXBRef, (snapshot) => {
         const data = snapshot.val();
         if (data) {
           const list = Object.values(data) as Sach[];
-          setSachList(list);
+          setNXBList(list);
         } else {
-          setSachList([]);
+          setNXBList([]);
         }
       });
 
       return () => unsubscribe();
-    }, [chude]);
+    }, [NXB]);
   }
   else {
     useEffect(() => {
-      if (!chude) return;
+      if (!NXB) return;
 
-      const sachQuery = query(ref(db, 'Sach'), orderByChild('chude'), equalTo(chude));
+      const sachQuery = query(ref(db, 'Sach'), orderByChild('nxb'), equalTo(NXB));
 
       const unsubscribe = onValue(sachQuery, (snapshot) => {
         const data = snapshot.val();
         if (data) {
           const list = Object.values(data) as Sach[];
-          setSachList(list);
+          setNXBList(list);
         } else {
-          setSachList([]);
+          setNXBList([]);
         }
       });
 
-      return () => unsubscribe();
-    }, [chude]);
+      return () => unsubscribe(); 
+    }, [NXB]);
   }
 
 
@@ -67,21 +67,21 @@ export default function ChuDePage() {
             <NhaXuatBanPartial />
           </div>
           <div className="col-9">
-            <h2 className="text-center">Sách theo chủ đề: {chude}</h2>
+            <h2 className="text-center">Sách theo nhà xuất bản: {NXB}</h2>
             <div className="row text-center">
-              {sachList.length > 0 ? (
-                sachList.map((sach, index) => (
-                  <div className="col-sm-6 col-md-4 col-lg-4 mb-4" key={index}>
-                    <div className="thumbnail h-100">
-                      <img src={sach.image} className="img-fluid img-rounded imgbook" alt={sach.ten} />
-                      <div className="caption mt-2">
-                        <h5>{sach.ten}</h5>
-                        <p>{sach.ttnoidung}</p>
+              {NXBList.length > 0 ? (
+                <div className="col-sm-4 col-md-4 col-lg-4 col-xs-6">
+                  {NXBList.map((sach, index) => (
+                    <div className="thumbnail" key={index}>
+                      <img src={sach.image} className="img-responsive img-rounded imgbook" alt={sach.ten} />
+                      <div className="caption">
+                        <h3 >{sach.ten}</h3>
+                        <p className="">{sach.ttnoidung}</p>
                         <button className="btn btn-primary">Thêm sản phẩm</button>
                       </div>
                     </div>
-                  </div>
-                ))
+                  ))}
+                </div>
               ) : (
                 <p>Không có sách nào trong chủ đề này.</p>
               )}

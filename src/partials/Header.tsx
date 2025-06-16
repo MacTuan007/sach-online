@@ -1,5 +1,17 @@
-import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 export default function Header() {
+    const [email, setEmail] = useState<string | null>(null)
+    const navigate = useNavigate()
+    useEffect(() => {
+        const storedEmail = localStorage.getItem('email')
+        setEmail(storedEmail)
+    }, [])
+    const handleLogout = () => {
+        localStorage.removeItem('email')
+        setEmail(null)
+        navigate('/')
+    }
     return (
         <>
             <header>
@@ -20,12 +32,35 @@ export default function Header() {
                                 <li className="nav-item">
                                     <a className="nav-link text-dark" href="#">Liên hệ </a>
                                 </li>
-                                <li className="nav-item">
-                                    <Link to="/DangKy" className="nav-link text-dark" >Đăng ký</Link>
-                                </li>
-                                <li className="nav-item">
-                                    <Link to="/DangNhap" className="nav-link text-dark" >Đăng Nhập</Link>
-                                </li>
+                            </ul>
+                            <ul className="navbar-nav ms-auto">
+                                {email ? (
+                                    <>
+                                        <li className='nav-item'>
+                                            <Link to="/Shopping" className="nav-link text-dark">
+                                                <img src='/images/shopping.png' alt='Giỏ hàng' className='img-fluid' style={{ width: '30px', height: '30px' }} />
+                                            </Link>
+
+                                        </li>
+                                        <li className="nav-item">
+                                            <span className="nav-link text-dark">Xin chào: {email}</span>
+                                        </li>
+                                        <li className="nav-item">
+                                            <button className="nav-link btn btn-link text-dark" onClick={handleLogout}>
+                                                Đăng xuất
+                                            </button>
+                                        </li>
+                                    </>
+                                ) : (
+                                    <>
+                                        <li className="nav-item">
+                                            <Link to="/DangKy" className="nav-link text-dark">Đăng ký</Link>
+                                        </li>
+                                        <li className="nav-item">
+                                            <Link to="/DangNhap" className="nav-link text-dark">Đăng Nhập</Link>
+                                        </li>
+                                    </>
+                                )}
                             </ul>
                         </div>
                     </div>
