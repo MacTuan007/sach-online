@@ -1,9 +1,10 @@
 import { equalTo, get, onValue, orderByChild, query, ref, remove, set, update } from "firebase/database";
 import { useEffect, useState } from "react";
 import { db } from "../firebase";
-import emailjs from 'emailjs-com';
 import { useNavigate } from "react-router-dom";
 import type { Sach } from "../interfaces/Sach";
+import Banner from "../partials/Banner";
+import Header from "../partials/Header";
 
 export default function ShoppingPage() {
     const navgate = useNavigate();
@@ -73,23 +74,45 @@ export default function ShoppingPage() {
                     order: sachList.map(item => ({
                         ten: item.ten,
                         soluong: item.soluong,
+                        giatien: item.giatien,
+                        thanhtien: item.soluong * item.giatien
                     })),
                 }),
             });
 
             const data = await response.json();
             alert(data.message);
+            const today = Date.now().toString();
+            const updates: Record<string, number> = {};
+            sachList.forEach(item => {
+                updates[`LichSuGiaoDich/${emailKey}/${today}/${item.id}`] = item.soluong;
+            });
+            await update(ref(db), updates);
+            await remove(ref(db, `GioHang/${emailKey}`));
+            navgate('/');
         } catch (error) {
             console.error('Lỗi gửi email:', error);
             alert('Không gửi được email');
         }
     };
     return (
+        <>
+        <Header />
         <div className="container mt-4">
             <h3 className="text-center mb-3">Giỏ hàng</h3>
 
             {sachList.length === 0 ? (
-                <p>Giỏ hàng trống.</p>
+                <table className="table table-bordered">
+                    <thead className="table-light">
+                        <tr>
+                            <th>Tên sách</th>
+                            <th className="text-center">Số lượng</th>
+                            <th className="text-end">Giá tiền</th>
+                            <th className="text-end">Thành tiền</th>
+                            <th className="text-center">Thao tác</th>
+                        </tr>
+                    </thead>
+                </table>
             ) : (
                 <>
                     <table className="table table-bordered">
@@ -97,6 +120,8 @@ export default function ShoppingPage() {
                             <tr>
                                 <th>Tên sách</th>
                                 <th className="text-center">Số lượng</th>
+                                <th className="text-end">Giá tiền</th>
+                                <th className="text-end">Thành tiền</th>
                                 <th className="text-center">Thao tác</th>
                             </tr>
                         </thead>
@@ -119,6 +144,8 @@ export default function ShoppingPage() {
                                             +
                                         </button>
                                     </td>
+                                    <td className="text-end">{sach.giatien.toLocaleString()} ₫</td>
+                                    <td className="text-end">{(sach.giatien * sach.soluong).toLocaleString()} ₫</td>
                                     <td className="text-center">
                                         <button
                                             className="btn btn-danger btn-sm"
@@ -129,6 +156,14 @@ export default function ShoppingPage() {
                                     </td>
                                 </tr>
                             ))}
+                            {/* Hàng tổng cộng */}
+                            <tr>
+                                <td colSpan={3} className="text-end fw-bold">Tổng cộng:</td>
+                                <td className="text-end fw-bold">
+                                    {sachList.reduce((total, item) => total + item.giatien * item.soluong, 0).toLocaleString()} ₫
+                                </td>
+                                <td></td>
+                            </tr>
                         </tbody>
                     </table>
 
@@ -140,6 +175,7 @@ export default function ShoppingPage() {
                 </>
             )}
         </div>
+        </>
     );
 };
 

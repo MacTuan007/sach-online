@@ -5,6 +5,13 @@ import type { Sach } from "../interfaces/Sach";
 
 export default function SachMoi() {
   const [sachList, setSachList] = useState<Sach[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 12;
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentSachList = sachList.slice(startIndex, endIndex);
+  const totalPages = Math.ceil(sachList.length / itemsPerPage);
+
   useEffect(() => {
     const sachQuery = query(ref(db, 'Sach'), limitToFirst(12));
     const unsubscribe = onValue(sachQuery, (snapshot) => {
@@ -49,7 +56,7 @@ export default function SachMoi() {
         <div className="row text-center">
           {sachList.length > 0 ? (
             sachList.map((sach, index) => (
-              <div className="col-sm-6 col-md-4 col-lg-4 mb-4" key={index}>
+              <div className="col-sm-6 col-md-4 col-lg-3 mb-4" key={index}>
                 <div className="thumbnail h-100">
                   <img src={sach.image} className="img-fluid img-rounded imgbook" alt={sach.ten} />
                   <div className="caption mt-2">
@@ -64,6 +71,20 @@ export default function SachMoi() {
             <p>Không có sách nào.</p>
           )}
         </div>
+        <nav className="mt-4">
+          <ul className="pagination justify-content-center">
+            {Array.from({ length: totalPages }, (_, index) => (
+              <li
+                key={index}
+                className={`page-item ${currentPage === index + 1 ? "active" : ""}`}
+              >
+                <button className="page-link" onClick={() => setCurrentPage(index + 1)}>
+                  {index + 1}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </nav>
       </div>
     </>
   )
