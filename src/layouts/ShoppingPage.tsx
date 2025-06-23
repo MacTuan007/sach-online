@@ -1,9 +1,8 @@
-import { equalTo, get, onValue, orderByChild, query, ref, remove, set, update } from "firebase/database";
+import { get, ref, remove, update } from "firebase/database";
 import { useEffect, useState } from "react";
 import { db } from "../firebase";
 import { useNavigate } from "react-router-dom";
 import type { Sach } from "../interfaces/Sach";
-import Banner from "../partials/Banner";
 import Header from "../partials/Header";
 
 export default function ShoppingPage() {

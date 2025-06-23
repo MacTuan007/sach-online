@@ -10,22 +10,18 @@ export default function Index() {
         <>
             <Header />
             <Banner />
-            <br />
-            <div className="container">
+            <div className="container my-4">
                 <div className="row">
-                    <div className="col-3">
+                    <aside className="col-12 col-md-3 mb-4">
                         <ChuDePartial />
-                        <br />
                         <NhaXuatBanPartial />
-                    </div>
-                    <div className="col-9">
+                    </aside>
+                    <main className="col-12 col-md-9">
                         <SachMoi />
-                    </div>
+                    </main>
                 </div>
             </div>
-            <br />
             <Footer />
-            
         </>
     );
 }

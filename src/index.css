@@ -36,3 +36,9 @@ body {
     background-color: #f9f9f9;
   }
 }
+
+@media (max-width: 768px) {
+    .btn {
+        width: 100%;
+    }
+}

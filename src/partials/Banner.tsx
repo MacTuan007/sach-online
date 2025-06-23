@@ -13,25 +13,24 @@ export default function Banner() {
 
     useEffect(() => {
         const interval = setInterval(() => {
-            setFade(false); // Bắt đầu fade out
-
+            setFade(false);
             setTimeout(() => {
                 setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
-                setFade(true); // Bắt đầu fade in
-            }, 500); // thời gian fade out (ms)
+                setFade(true);
+            }, 500);
         }, 5000);
-
         return () => clearInterval(interval);
     }, []);
+
     return (
-        <>
-            <div className="banner-container">
+        <div className="container-fluid px-0">
+            <div className="banner-container w-100">
                 <img
                     src={images[currentIndex].src}
-                    alt="Banner"
-                    className={`banner-image ${fade ? 'fade-in' : 'fade-out'}`}
+                    alt={images[currentIndex].alt}
+                    className={`img-fluid w-100 banner-image ${fade ? 'fade-in' : 'fade-out'}`}
                 />
             </div>
-        </>
+        </div>
     );
 }
