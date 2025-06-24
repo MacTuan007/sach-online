@@ -8,6 +8,7 @@ import ShoppingPage from './layouts/ShoppingPage.tsx';
 import IndexAdmin from './layoutsAdmin/indexAdmin.tsx';
 import QuanLyChuDe from './layoutsAdmin/QuanLyChuDe.tsx';
 import ChiTietPage from './layouts/ChiTietPage.tsx';
+import QuanLyNXB from './layoutsAdmin/QuanLyNXB.tsx';
 
 export default function App() {
   return (
@@ -15,13 +16,14 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/chude/:chude" element={<ChuDePage />} />
-        <Route path="/NXB" element={<NhaXuatBanPage />} />
+        <Route path="/NXB/:NXB" element={<NhaXuatBanPage />} />
         <Route path='/DangKy' element={<DangKy/>} />
         <Route path='/DangNhap' element={<DangNhap/>} />
         <Route path='/sanpham/:id' element={<ChiTietPage/>} />
         <Route path='/Shopping' element={<ShoppingPage/>} />
         <Route path='/Admin' element={<IndexAdmin/>} />
         <Route path='/Admin/Chude' element={<QuanLyChuDe/>} />
+        <Route path='/Admin/NXB' element={<QuanLyNXB/>} />
       </Routes>
     </BrowserRouter>
   );

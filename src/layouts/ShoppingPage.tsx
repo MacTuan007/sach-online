@@ -1,7 +1,7 @@
 import { get, ref, remove, update } from "firebase/database";
 import { useEffect, useState } from "react";
 import { db } from "../firebase";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import type { Sach } from "../interfaces/Sach";
 import Header from "../partials/Header";
 
@@ -105,6 +105,7 @@ export default function ShoppingPage() {
                     <thead className="table-light">
                         <tr>
                             <th>Tên sách</th>
+                            <th className="text-center">Hình ảnh</th>
                             <th className="text-center">Số lượng</th>
                             <th className="text-end">Giá tiền</th>
                             <th className="text-end">Thành tiền</th>
@@ -118,6 +119,7 @@ export default function ShoppingPage() {
                         <thead className="table-light">
                             <tr>
                                 <th>Tên sách</th>
+                                <th className="text-center">Hình ảnh</th>
                                 <th className="text-center">Số lượng</th>
                                 <th className="text-end">Giá tiền</th>
                                 <th className="text-end">Thành tiền</th>
@@ -128,6 +130,7 @@ export default function ShoppingPage() {
                             {sachList.map((sach) => (
                                 <tr key={sach.id}>
                                     <td>{sach.ten}</td>
+                                    <th className="text-center"><Link to={`/sanpham/${sach.id}`}><img src={sach.image}></img></Link></th>
                                     <td className="text-center">
                                         <button
                                             className="btn btn-sm btn-secondary me-1"
