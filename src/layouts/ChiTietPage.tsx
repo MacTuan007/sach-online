@@ -94,7 +94,7 @@ export default function ChiTietPage() {
                             <div className="mt-5">
                                 <h4 className="mb-3">Nội dung chi tiết</h4>
                                 <div className="border p-3 rounded bg-light" style={{ whiteSpace: "pre-line" }}>
-                                    {product.ttnoidung}
+                                    {product.noidung}
                                 </div>
                             </div>
                             <div className="mt-5">

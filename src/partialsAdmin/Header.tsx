@@ -21,6 +21,9 @@ export default function Header() {
                                 <li className="nav-item">
                                     <Link to="/Admin/NXB" className="nav-link text-dark" >Nhà xuất bản</Link>
                                 </li>
+                                <li className="nav-item">
+                                    <Link to="/Admin/Sach" className="nav-link text-dark" >Sách</Link>
+                                </li>
                             </ul>
                             <ul className="navbar-nav ms-auto">
                                 
