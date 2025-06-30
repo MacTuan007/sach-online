@@ -1,0 +1,136 @@
+/* iCheck plugin Flat skin, blue
+----------------------------------- */
+.icheckbox_flat-blue,
+.iradio_flat-blue {
+    top: -2px;
+    margin-right: 5px;
+}
+
+.txtGray {
+    color: #798594;
+}
+
+.bank-group {
+    margin-left: 30px;
+    max-width: 850px;
+}
+
+a,
+a:hover,
+a:visited,
+a:link {
+    text-decoration: none !important;
+    color: #293C56;
+}
+
+a.bank-item {
+    display: inline-block;
+    width: 180px;
+    height: 48px;
+    padding: 10px;
+    border-radius: 4px;
+    border: 2px solid #f1f1f1;
+    position: relative;
+    vertical-align: top;
+    margin-right: 10px;
+    margin-bottom: 15px;
+    font-size: 13px;
+}
+
+a.bank-item .checkmark {
+    display: none;
+    width: 20px;
+    height: 20px;
+}
+
+a.bank-item.selected .checkmark {
+    display: block;
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    margin-right: 0;
+}
+
+a.bank-item.selected,
+a.bank-item:hover {
+    border: 2px solid #04BE04;
+}
+
+a.bank-item img {
+    vertical-align: middle !important;
+    display: inline-block;
+    margin-right: 5px;
+}
+
+
+
+.icheckbox_flat-blue,
+.iradio_flat-blue {
+    display: inline-block;
+    display: inline;
+    vertical-align: middle;
+    margin: 0;
+    padding: 0;
+    width: 20px;
+    height: 20px;
+    background: url(blue.png) no-repeat;
+    border: none;
+    cursor: pointer;
+}
+
+.icheckbox_flat-blue {
+    background-position: 0 0;
+}
+
+.icheckbox_flat-blue.checked {
+    background-position: -22px 0;
+}
+
+.icheckbox_flat-blue.disabled {
+    background-position: -44px 0;
+    cursor: default;
+}
+
+.icheckbox_flat-blue.checked.disabled {
+    background-position: -66px 0;
+}
+
+.iradio_flat-blue {
+    background-position: -88px 0;
+}
+
+.iradio_flat-blue.checked {
+    background-position: -110px 0;
+}
+
+.iradio_flat-blue.disabled {
+    background-position: -132px 0;
+    cursor: default;
+}
+
+.iradio_flat-blue.checked.disabled {
+    background-position: -154px 0;
+}
+
+.pay-button {
+  margin-top: 16px;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+/* HiDPI support */
+@media (-o-min-device-pixel-ratio: 5/4),
+(-webkit-min-device-pixel-ratio: 1.25),
+(min-resolution: 120dpi),
+(min-resolution: 1.25dppx) {
+
+    .icheckbox_flat-blue,
+    .iradio_flat-blue {
+        background-image: url(blue@2x.png);
+        -webkit-background-size: 176px 22px;
+        background-size: 176px 22px;
+    }
+}
