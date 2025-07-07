@@ -1,7 +1,7 @@
 import banner1 from '/images/banner1.jpg';
 import banner2 from '/images/banner2.png';
 import { useEffect, useState } from 'react';
-import '../css/Banner.css';
+import '../css/banner.css';
 
 const images = [
     { src: banner1, alt: 'Khuyến mãi 1' },
