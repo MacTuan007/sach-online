@@ -65,7 +65,7 @@ export default function ShoppingPage() {
     // const handleConfirm = async () => {
     //     const email = localStorage.getItem('email');
     //     try {
-    //         const response = await fetch('http://localhost:5000/api/send-email', {
+    //         const response = await fetch('https://sach-online.onrender.com/api/send-email', {
     //             method: 'POST',
     //             headers: { 'Content-Type': 'application/json' },
     //             body: JSON.stringify({
@@ -98,7 +98,7 @@ export default function ShoppingPage() {
         const totalAmount = sachList.reduce((total, item) => total + item.giatien * item.soluong, 0);
 
         try {
-            const response = await fetch('http://localhost:5000/create_payment', {
+            const response = await fetch('https://sach-online.onrender.com/create_payment', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

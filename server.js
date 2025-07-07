@@ -12,7 +12,7 @@ const moment = require("moment")
 const app = express();
 const PORT = 5000;
 
-app.use(cors({ origin: 'https://maximum-guinea-eternal.ngrok-free.app' }));
+app.use(cors({ origin: 'https://sach-online.onrender.com/' }));
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'dist')));
 // Route gửi email
