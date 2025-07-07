@@ -6,13 +6,13 @@ import type { Sach } from "../interfaces/Sach";
 import Header from "../partials/Header";
 
 export default function ShoppingPage() {
-    const navgate = useNavigate();
+    const navigate = useNavigate();
     const [sachList, setSachList] = useState<Sach[]>([]);
     const emailKey = localStorage.getItem('emailKey');
     useEffect(() => {
 
         if (!emailKey) {
-            navgate('/DangNhap');
+            navigate('/DangNhap');
             return;
         }
         const cartRef = ref(db, `GioHang/${emailKey}`);
@@ -105,7 +105,6 @@ export default function ShoppingPage() {
                 },
                 body: JSON.stringify({
                     amount: totalAmount,
-                    emailKey,
                     sachList,
                 }),
             });
