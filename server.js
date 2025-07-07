@@ -3,6 +3,7 @@ const ViteExpress = require('vite-express');
 const nodemailer = require('nodemailer');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const path = require('path');
 const qs = require('qs');
 const crypto = require('crypto');
 const moment = require("moment")
