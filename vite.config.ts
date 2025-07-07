@@ -7,11 +7,13 @@ export default defineConfig({
   server: {
     proxy: {
       '/api/send-email': 'http://localhost:5000',
-      '/api/vnpay/thanh_toan': 'http://localhost:5000',
     },
     host : true,
     port : 5000,
     allowedHosts: ['maximum-guinea-eternal.ngrok-free.app'],
     cors: true,
   },
+  build: {
+    outDir: 'dist', // Đảm bảo giống đường dẫn trong server.js
+  }
 })

@@ -13,7 +13,7 @@ const PORT = 5000;
 
 app.use(cors({ origin: 'https://maximum-guinea-eternal.ngrok-free.app' }));
 app.use(bodyParser.json());
-
+app.use(express.static(path.join(__dirname, 'dist')));
 // Route gửi email
 app.post('/api/send-email', async (req, res) => {
   const { email, order } = req.body;
