@@ -98,7 +98,7 @@ export default function ShoppingPage() {
         const totalAmount = sachList.reduce((total, item) => total + item.giatien * item.soluong, 0);
 
         try {
-            const response = await fetch('https://maximum-guinea-eternal.ngrok-free.app/api/vnpay/thanh-toan', {
+            const response = await fetch('http://localhost:5000/create_payment', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

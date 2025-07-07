@@ -5,19 +5,11 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const qs = require('qs');
 const crypto = require('crypto');
-const { ignoreLogger, VNPay, ProductCode, VnpLocale, dateFormat } = require('vnpay');
+const moment = require("moment")
 
 
 const app = express();
 const PORT = 5000;
-const vnpay = new VNPay({
-  TmnCode: 'T0XYPCO6',
-  secureSecret: 'KWQLKX4J89SCOXZ6KBSJMWGQ5PBBD3RL',
-  vnpayHost: 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html',
-  testMode: true,
-  hashAlgorithm: 'SHA512',
-  loggerFn: ignoreLogger,
-})
 
 app.use(cors({ origin: 'https://maximum-guinea-eternal.ngrok-free.app' }));
 app.use(bodyParser.json());
@@ -59,149 +51,82 @@ app.post('/api/send-email', async (req, res) => {
 });
 
 function sortObject(obj) {
-  const sorted = {};
-  Object.keys(obj)
-    .sort()
-    .forEach((key) => {
-      sorted[key] = typeof obj[key] === 'string' ? obj[key] : obj[key].toString();
-    });
+  let sorted = {};
+  let keys = Object.keys(obj).sort();
+  keys.forEach((key) => {
+    sorted[key] = obj[key];
+  });
   return sorted;
 }
 
 const pendingOrders = new Map();
-app.post('/api/vnpay/thanh-toan', async (req, res) => {
-  const ipRaw = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
-  const ipAddr = Array.isArray(ipRaw) ? ipRaw[0] : ipRaw.toString().split(',')[0].trim();
+app.post('/create_payment', async (req, res) => {
+  const tmnCode = "CFFD0BGK"; // Lấy từ VNPay .env
+  const secretKey = "E5LTCMVQ0NADKODCFFVVX1MIG8UL5MMR"; // Lấy từ VNPay
 
-  const date = new Date();
+  const returnUrl = "http://localhost:5000/payment-result"; // Trang kết quả
+  const vnp_Url = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
+  let ipAddr = req.ip;
+  let orderId = moment().format("YYYYMMDDHHmmss");
+  let bankCode = "NCB";
 
-  const createDate = `${date.getFullYear()}${(date.getMonth() + 1)
-    .toString()
-    .padStart(2, '0')}${date.getDate().toString().padStart(2, '0')}${date
-      .getHours()
-      .toString()
-      .padStart(2, '0')}${date.getMinutes().toString().padStart(2, '0')}${date
-        .getSeconds()
-        .toString()
-        .padStart(2, '0')}`;
-  const orderId = date.getTime();
+  let createDate = moment().format("YYYYMMDDHHmmss");
+  let orderInfo = "Thanh_toan_don_hang";
+  let locale = "vn";
+  let currCode = "VND";
 
-
-  const { emailKey, sachList } = req.body;
-  pendingOrders.set(orderId.toString(), { emailKey, sachList });
-  const ahour = new Date();
-  ahour.setHours(ahour.getHours() + 1);
-  const vnp_Params = {
-    vnp_Version: '2.1.0',
-    vnp_Command: 'pay',
-    vnp_TmnCode: 'T0XYPCO6',
-    vnp_Locale: 'vn',
-    vnp_CurrCode: 'VND',
-    vnp_TxnRef: orderId.toString(),
-    vnp_OrderInfo: 'Thanh toan don hang',
-    vnp_OrderType: 'other', // hoặc "order" nếu muốn thanh toán đơn hàng
-    vnp_Amount: (10000 * 100).toString(), // phải nhân 100
-    vnp_ReturnUrl: 'https://maximum-guinea-eternal.ngrok-free.app/vnpay_return',
-    vnp_IpAddr: ipAddr.toString(),
-    vnp_CreateDate: dateFormat(new Date()).toString(),
-    vnp_ExpireDate: dateFormat(ahour).toString(),
+  const { amount, emailKey, sachList } = req.body;
+  let vnp_Params = {
+    vnp_Version: "2.1.0",
+    vnp_Command: "pay",
+    vnp_TmnCode: tmnCode,
+    vnp_Locale: locale,
+    vnp_CurrCode: currCode,
+    vnp_TxnRef: orderId,
+    vnp_OrderInfo: orderInfo,
+    vnp_OrderType: "billpayment",
+    vnp_Amount: amount * 100,
+    vnp_ReturnUrl: returnUrl,
+    vnp_IpAddr: ipAddr,
+    vnp_CreateDate: createDate,
   };
-  delete vnp_Params.vnp_SecureHash;
-  delete vnp_Params.vnp_SecureHashType;
+  // vnp_Params["vnp_BankCode"] = bankCode;
 
-  const sortedParams = sortObject(vnp_Params);
-  const signData = qs.stringify(sortedParams, { encode: false });
-  console.log("✅ signData:", signData);
-  const hmac = crypto.createHmac('sha512', 'KWQLKX4J89SCOXZ6KBSJMWGQ5PBBD3RL');
-  const signed = hmac.update(signData, 'utf-8').digest('hex');
-  console.log("✅ signed:", signed);
-  sortedParams.vnp_SecureHash = signed;
+  vnp_Params = sortObject(vnp_Params);
 
-  const paymentUrl = 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html?' +
-    qs.stringify(sortedParams, { encode: true });
+  let signData = qs.stringify(vnp_Params);
+  let hmac = crypto.createHmac("sha512", secretKey);
+  let signed = hmac.update(new Buffer.from(signData, "utf-8")).digest("hex");
+  vnp_Params["vnp_SecureHash"] = signed;
+
+  let paymentUrl = vnp_Url + "?" + qs.stringify(vnp_Params);
   console.log("✅ paymentUrl:", paymentUrl);
-
-
-
-  // const vnpayResponse = await vnpay.buildPaymentUrl({
-  //   vnp_ReturnUrl: 'https://maximum-guinea-eternal.ngrok-free.app/vnpay_return',
-  //   vnp_Locale: VnpLocale.VN,
-  //   vnp_CurrCode: 'VND',
-  //   vnp_TxnRef: orderId.toString(),
-  //   vnp_OrderInfo: orderInfo,
-  //   vnp_OrderType: 'order',
-  //   vnp_Amount: amount,
-  //   vnp_IpAddr: ipAddr,
-  //   vnp_CreateDate: dateFormat(new Date()),
-  //   vnp_ExpireDate: dateFormat(ahour),
-  // })
-  // console.log("Payment URL:", vnpayResponse);
-
   res.json({ paymentUrl });
+
 });
 
-app.get('/vnpay_return', (req, res) => {
-  const vnp_Params = req.query;
-  console.log("🔁 VNPay callback query:", req.query);
+app.get('/check_payment', (req, res) => {
+  const query = req.query;
+    const secretKey = "PBNLKF8YGRNCPXLDJLY9V1023CW8206U";
+    const vnp_SecureHash = query.vnp_SecureHash;
 
-  // Tách secure hash ra
-  const secureHash = vnp_Params.vnp_SecureHash;
-  delete vnp_Params.vnp_SecureHash;
-  delete vnp_Params.vnp_SecureHashType;
+    delete query.vnp_SecureHash;
+    const signData = qs.stringify(query);
 
-  // Sort params
-  const sortedParams = sortObject(vnp_Params);
+    const hmac = crypto.createHmac("sha512", secretKey);
+    const checkSum = hmac.update(signData).digest("hex");
+    console.log(query);
 
-  const signData = qs.stringify(sortedParams, { encode: false });
-  const hmac = crypto.createHmac('sha512', process.env.VNPAY_HASH_SECRET);
-  const signed = hmac.update(signData, 'utf-8').digest('hex');
-
-  // So sánh chữ ký
-  if (secureHash === signed) {
-    // ✅ Thành công
-    return res.send('Thanh toán thành công');
-  } else {
-    // ❌ Sai chữ ký
-    return res.status(400).send('Sai chữ ký');
-  }
+    if (vnp_SecureHash === checkSum) {
+        if (query.vnp_ResponseCode === "00") {
+            res.json({ message: "Thanh toán thành công", data: query });
+        } else {
+            res.json({ message: "Thanh toán thất bại", data: query });
+        }
+    } else {
+        res.status(400).json({ message: "Dữ liệu không hợp lệ" });
+    }
 });
-
-// app.get('/vnpay_return', async (req, res) => {
-//   // let vnp_Params = req.query;
-//   // const secureHash = vnp_Params['vnp_SecureHash'];
-//   // delete vnp_Params['vnp_SecureHash'];
-//   // delete vnp_Params['vnp_SecureHashType'];
-//   // const hashSecret = 'KWQLKX4J89SCOXZ6KBSJMWGQ5PBBD3RL'; // đặt biến tường minh
-//   // const signData = querystring.stringify(sortObject(vnp_Params), { encode: false });
-//   // const hmac = crypto.createHmac('sha512', hashSecret);
-//   // const signed = hmac.update(Buffer.from(signData, 'utf-8')).digest('hex');
-
-//   // if (secureHash === signed) {
-//   //   const txnRef = vnp_Params['vnp_TxnRef'];
-//   //   const orderData = pendingOrders.get(txnRef);
-
-//   //   if (!orderData) {
-//   //     return res.status(404).send('Không tìm thấy đơn hàng tương ứng');
-//   //   }
-
-//   //   const { emailKey, sachList } = orderData;
-
-//   //   const updates = {};
-//   //   const timestamp = Date.now().toString();
-//   //   for (const sach of sachList) {
-//   //     updates[`LichSuGiaoDich/${emailKey}/${timestamp}/${sach.id}`] = sach.soluong;
-//   //   }
-
-//   //   await update(ref(db), updates);
-//   //   await remove(ref(db, `GioHang/${emailKey}`));
-//   //   pendingOrders.delete(txnRef);
-
-//   //   res.send('Thanh toán thành công! ✅ Đơn hàng đã được ghi nhận.');
-//   // } else {
-//   //   res.status(400).send('Chữ ký không hợp lệ! ❌');
-//   // }
-// });
-
 
 
 // Khởi động server với ViteExpress
