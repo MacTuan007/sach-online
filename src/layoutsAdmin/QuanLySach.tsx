@@ -1,95 +1,107 @@
-// import { useEffect, useState } from "react";
-// import Header from "../partialsAdmin/Header";
-// import type { Sach } from "../interfaces/Sach";
-// import { onValue, query, ref } from "firebase/database";
-// import { db } from "../firebase";
+import { useEffect, useState } from "react";
+import { db } from "../firebase";
+import { get, push, ref, remove, set } from "firebase/database";
+import AddSachModal from "../modals/AddSach";
+import EditSachModal from "../modals/EditSach";
+import type { Sach } from "../interfaces/Sach";
 
-// export default function QuanLySach() {
-//     const [sachList, setSachList] = useState<Sach[]>([]);
-//     const [selectedSach, setSelectedSach] = useState<Sach | null>(null);
-//     const [showModal, setShowModal] = useState(false);
-//     const [showAddModal, setShowAddModal] = useState(false);
-//     useEffect(() => {
-//         const sachQuery = query(ref(db, 'Sach'));
-//         const unsubscribe = onValue(sachQuery, (snapshot) => {
-//             const data = snapshot.val();
-//             if (data) {
-//                 const list: Sach[] = Object.entries(data).map(([id, value]) => ({
-//                     id, ...(value as Omit<Sach, "id">)
-//                 }));
-//                 setSachList(list);
-//             } else {
-//                 setSachList([]);
-//             }
-//         });
-//         return () => unsubscribe();
-//     }, []);
-//     const handleAdd = async (newSach: Omit<Sach, "id">) => {
-        
-//     };
+export default function QuanLySach() {
+  const [sachList, setSachList] = useState<Sach[]>([]);
+  const [showAdd, setShowAdd] = useState(false);
+  const [editSach, setEditSach] = useState<Sach | null>(null);
 
-//     const handleEdit = (sach: Sach) => {
-        
-//     };
+  const fetchSachList = async () => {
+    const snapshot = await get(ref(db, "Sach"));
+    const data = snapshot.val();
+    if (data) {
+      const list = Object.entries(data).map(([id, value]) => ({
+        id,
+        ...(value as Omit<Sach, "id">),
+      }));
+      setSachList(list);
+    } else {
+      setSachList([]);
+    }
+  };
 
-//     const handleDelete = async (id: string) => {
-        
-//     }
+  useEffect(() => {
+    fetchSachList();
+  }, []);
 
+  const uploadImage = async (file: File): Promise<string | null> => {
+    const formData = new FormData();
+    formData.append("image", file);
+    const res = await fetch("https://sach-online.onrender.com/upload", {
+      method: "POST",
+      body: formData,
+    });
+    const data = await res.json();
+    return data.imageUrl || null;
+  };
 
+  const handleAdd = async (sach: Omit<Sach, "id">, imageFile: File | null) => {
+    if (!imageFile) return alert("Vui lòng chọn ảnh!");
+    const imageUrl = await uploadImage(imageFile);
+    if (!imageUrl) return alert("Lỗi upload ảnh!");
+    await push(ref(db, "Sach"), { ...sach, image: imageUrl });
+    fetchSachList();
+  };
 
-//     return (
-//         <>
-//             <Header />
-//             <h2 className="text-center mt-3">Quản lý Sách</h2>
-//             <div className="d-flex justify-content-end mb-3 me-3">
-//                 <button
-//                     className="btn btn-success"
-//                     onClick={() => {
-//                         setShowAddModal(true);
-//                     }}
-//                 >
-//                     Thêm Sách mới
-//                 </button>
-//             </div>
-//             <table className="table table-bordered">
-//                 <thead className="table-light">
-//                     <tr>
-//                         <th>Tên sách</th>
-//                         <th className="text-center">Hình ảnh</th>
-//                         <th className="text-center">Tóm tắt nội dung</th>
-//                         <th className="text-end">Số lượng</th>
-//                         <th className="text-end">Giá tiền</th>
-//                         <th className="text-center">Thao tác</th>
-//                     </tr>
-//                 </thead>
-//                 <tbody>
-//                     {sachList.map((sach) => (
-//                         <tr key={sach.id}>
-//                             <td>{sach.ten}</td>
-//                             <th className="text-center"><img src={sach.image}></img></th>
-//                             <th className="text-center">{sach.ttnoidung}</th>
-//                             <th className="text-center">{sach.soluong}</th>
-//                             <th className="text-center">{sach.giatien}</th>
-//                             <td className="text-center">
-//                                 <td className="text-center">
-//                                     <button
-//                                         className="btn btn-sm btn-secondary me-1"
-//                                         onClick={() => handleEdit(sach)}
-//                                     >
-//                                         Sửa
-//                                     </button>
-//                                     <button
-//                                         className="btn btn-sm btn-secondary ms-1"
-//                                         onClick={() => handleDelete(sach.id)}
-//                                     >
-//                                         Xoá
-//                                     </button>
-//                                 </td>
-//                             </td>
-//                         </tr>
-//                     ))}
-//                 </tbody>
-//             </table>
-//         </>);
-// }
+  const handleEdit = async (sach: Sach, imageFile: File | null) => {
+    let imageUrl = sach.image;
+    if (imageFile) {
+      const uploaded = await uploadImage(imageFile);
+      if (uploaded) imageUrl = uploaded;
+    }
+    await set(ref(db, `Sach/${sach.id}`), { ...sach, image: imageUrl });
+    fetchSachList();
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!window.confirm("Bạn có chắc muốn xoá?")) return;
+    await remove(ref(db, `Sach/${id}`));
+    fetchSachList();
+  };
+
+  return (
+    <div className="container mt-4">
+      <h3 className="mb-3">Quản lý sách</h3>
+      <button className="btn btn-success mb-3" onClick={() => setShowAdd(true)}>+ Thêm sách</button>
+      <table className="table table-bordered">
+        <thead className="table-light">
+          <tr>
+            <th>Tên</th>
+            <th>Tác giả</th>
+            <th>Giá</th>
+            <th>Ảnh</th>
+            <th>Thao tác</th>
+          </tr>
+        </thead>
+        <tbody>
+          {sachList.map((s) => (
+            <tr key={s.id}>
+              <td>{s.ten}</td>
+              <td>{s.tacgia}</td>
+              <td>{s.giatien.toLocaleString()} ₫</td>
+              <td><img src={s.image} alt={s.ten} width={80} /></td>
+              <td>
+                <button className="btn btn-primary btn-sm me-2" onClick={() => setEditSach(s)}>Sửa</button>
+                <button className="btn btn-danger btn-sm" onClick={() => handleDelete(s.id)}>Xoá</button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      <AddSachModal show={showAdd} onClose={() => setShowAdd(false)} onSave={handleAdd} />
+      {editSach && (
+        <EditSachModal
+          show={!!editSach}
+          onClose={() => setEditSach(null)}
+          onSave={handleEdit}
+          sach={editSach}
+        />
+      )}
+    </div>
+  );
+}
