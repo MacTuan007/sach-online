@@ -1,60 +1,70 @@
 import { useEffect, useState } from "react";
-import { Modal, Button, Form } from "react-bootstrap";
+import { Modal, Button } from "react-bootstrap";
+import { db } from "../firebase";
+import { get, ref } from "firebase/database";
 import type { Sach } from "../interfaces/Sach";
 
-type EditSachModalProps = {
+interface Props {
   show: boolean;
   onClose: () => void;
-  onSave: (sach: Sach, imageFile: File | null) => void;
+  onSave: (sach: Sach, image: File | null) => void;
   sach: Sach;
-};
+}
 
-export default function EditSachModal({ show, onClose, onSave, sach }: EditSachModalProps) {
-  const [formData, setFormData] = useState<Omit<Sach, "id">>({ ...sach });
+export default function EditSachModal({ show, onClose, onSave, sach: initSach }: Props) {
+  const [sach, setSach] = useState<Sach>(initSach);
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [chuDes, setChuDes] = useState<{ ten: string, tenlink: string }[]>([]);
+  const [nxbs, setNxbs] = useState<{ ten: string, tenlink: string }[]>([]);
 
   useEffect(() => {
-    setFormData({ ...sach });
-  }, [sach]);
+    if (show) {
+      setSach(initSach);
+      fetchOptions();
+    }
+  }, [show, initSach]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: name === "giatien" || name === "soluong" ? Number(value) : value
-    }));
+  const fetchOptions = async () => {
+    const chudeSnap = await get(ref(db, "ChuDe"));
+    const nxbSnap = await get(ref(db, "NhaXuatBan"));
+    if (chudeSnap.exists()) setChuDes(Object.values(chudeSnap.val()) as any[]);
+    if (nxbSnap.exists()) setNxbs(Object.values(nxbSnap.val()) as any[]);
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setImageFile(e.target.files?.[0] || null);
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setSach(prev => ({ ...prev, [name]: name === "giatien" || name === "soluong" ? Number(value) : value }));
   };
 
   const handleSubmit = () => {
-    onSave({ ...formData, id: sach.id }, imageFile);
+    if (!sach.ten || !sach.nxb || !sach.chude) return alert("Thiếu thông tin!");
+    onSave(sach, imageFile);
     onClose();
   };
 
   return (
-    <Modal show={show} onHide={onClose} centered>
-      <Modal.Header closeButton>
-        <Modal.Title>Chỉnh sửa sách</Modal.Title>
-      </Modal.Header>
+    <Modal show={show} onHide={onClose}>
+      <Modal.Header closeButton><Modal.Title>Sửa sách</Modal.Title></Modal.Header>
       <Modal.Body>
-        <Form>
-          <Form.Control name="ten" value={formData.ten} className="mb-2" onChange={handleChange} />
-          <Form.Control name="tacgia" value={formData.tacgia} className="mb-2" onChange={handleChange} />
-          <Form.Control type="number" name="giatien" value={formData.giatien} className="mb-2" onChange={handleChange} />
-          <Form.Control type="number" name="soluong" value={formData.soluong} className="mb-2" onChange={handleChange} />
-          <Form.Control name="nxb" value={formData.nxb} className="mb-2" onChange={handleChange} />
-          <Form.Control name="chude" value={formData.chude} className="mb-2" onChange={handleChange} />
-          <Form.Control as="textarea" name="ttnoidung" value={formData.ttnoidung} className="mb-2" onChange={handleChange} />
-          <Form.Control as="textarea" name="noidung" value={formData.noidung} className="mb-2" onChange={handleChange} />
-          <Form.Control type="file" className="mb-2" onChange={handleImageChange} />
-        </Form>
+        <input name="ten" value={sach.ten} className="form-control mb-2" onChange={handleChange} />
+        <input name="tacgia" value={sach.tacgia} className="form-control mb-2" onChange={handleChange} />
+        <input name="giatien" type="number" value={sach.giatien} className="form-control mb-2" onChange={handleChange} />
+        <input name="soluong" type="number" value={sach.soluong} className="form-control mb-2" onChange={handleChange} />
+        <select name="nxb" value={sach.nxb} className="form-control mb-2" onChange={handleChange}>
+          <option value="">-- Chọn NXB --</option>
+          {nxbs.map((n, i) => <option key={i} value={n.tenlink}>{n.ten}</option>)}
+        </select>
+        <select name="chude" value={sach.chude} className="form-control mb-2" onChange={handleChange}>
+          <option value="">-- Chọn Chủ đề --</option>
+          {chuDes.map((c, i) => <option key={i} value={c.tenlink}>{c.ten}</option>)}
+        </select>
+        <textarea name="ttnoidung" value={sach.ttnoidung} className="form-control mb-2" onChange={handleChange} />
+        <textarea name="noidung" value={sach.noidung} className="form-control mb-2" onChange={handleChange} />
+        <input type="file" className="form-control mb-2" onChange={(e) => setImageFile(e.target.files?.[0] || null)} />
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="secondary" onClick={onClose}>Hủy</Button>
-        <Button variant="primary" onClick={handleSubmit}>Lưu</Button>
+        <Button variant="secondary" onClick={onClose}>Đóng</Button>
+        <Button variant="primary" onClick={handleSubmit}>Lưu thay đổi</Button>
       </Modal.Footer>
     </Modal>
   );
