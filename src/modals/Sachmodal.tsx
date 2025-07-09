@@ -1,6 +1,13 @@
 import { useEffect, useState } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
+import { get, ref } from "firebase/database";
+import { db } from "../firebase";
 import type { Sach } from "../interfaces/Sach";
+
+type NamedItem = {
+  ten: string;
+  tenlink: string;
+};
 
 type Props = {
   show: boolean;
@@ -24,6 +31,8 @@ export default function SachModal({ show, onClose, onSave, initSach, isEdit }: P
   });
 
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [chuDeList, setChuDeList] = useState<NamedItem[]>([]);
+  const [nxbList, setNxbList] = useState<NamedItem[]>([]);
 
   useEffect(() => {
     if (initSach) {
@@ -31,6 +40,29 @@ export default function SachModal({ show, onClose, onSave, initSach, isEdit }: P
       setSach(rest);
     }
   }, [initSach]);
+
+  useEffect(() => {
+    const fetchLists = async () => {
+      const [chuDeSnap, nxbSnap] = await Promise.all([
+        get(ref(db, "ChuDe")),
+        get(ref(db, "NXB")),
+      ]);
+
+      const chudeData = chuDeSnap.val();
+      const nxbData = nxbSnap.val();
+
+      setChuDeList(
+        chudeData ? Object.values(chudeData) as NamedItem[] : []
+      );
+      setNxbList(
+        nxbData ? Object.values(nxbData) as NamedItem[] : []
+      );
+    };
+
+    if (show) {
+      fetchLists();
+    }
+  }, [show]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -43,6 +75,14 @@ export default function SachModal({ show, onClose, onSave, initSach, isEdit }: P
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
     setImageFile(file);
+  };
+
+  const handleDropdownChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setSach(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   const handleSubmit = () => {
@@ -78,11 +118,21 @@ export default function SachModal({ show, onClose, onSave, initSach, isEdit }: P
           </Form.Group>
           <Form.Group className="mb-2">
             <Form.Label>Nhà xuất bản</Form.Label>
-            <Form.Control name="nxb" value={sach.nxb} onChange={handleChange} />
+            <Form.Select name="nxb" value={sach.nxb} onChange={handleDropdownChange}>
+              <option value="">-- Chọn NXB --</option>
+              {nxbList.map((n) => (
+                <option key={n.tenlink} value={n.tenlink}>{n.ten}</option>
+              ))}
+            </Form.Select>
           </Form.Group>
           <Form.Group className="mb-2">
             <Form.Label>Chủ đề</Form.Label>
-            <Form.Control name="chude" value={sach.chude} onChange={handleChange} />
+            <Form.Select name="chude" value={sach.chude} onChange={handleDropdownChange}>
+              <option value="">-- Chọn Chủ đề --</option>
+              {chuDeList.map((c) => (
+                <option key={c.tenlink} value={c.tenlink}>{c.ten}</option>
+              ))}
+            </Form.Select>
           </Form.Group>
           <Form.Group className="mb-2">
             <Form.Label>Số lượng</Form.Label>
