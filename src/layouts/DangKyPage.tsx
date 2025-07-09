@@ -36,7 +36,10 @@ export default function DangKy() {
                 return;
             }
         }
-
+        if (khachhang.username.length < 6) {
+            setError('Tài khoản phải có ít nhất 6 ký tự!');
+            return;
+        }
         if (khachhang.password.length < 6) {
             setError('Mật khẩu phải có ít nhất 6 ký tự!');
             return;

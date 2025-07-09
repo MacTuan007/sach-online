@@ -9,6 +9,8 @@ export default function QuanLySach() {
   const [sachList, setSachList] = useState<Sach[]>([]);
   const [showAdd, setShowAdd] = useState(false);
   const [editSach, setEditSach] = useState<Sach | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
 
   const fetchSachList = async () => {
     const snapshot = await get(ref(db, "Sach"));
@@ -63,6 +65,19 @@ export default function QuanLySach() {
     fetchSachList();
   };
 
+  // === PHÂN TRANG ===
+  const totalPages = Math.ceil(sachList.length / itemsPerPage);
+  const paginatedData = sachList.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const changePage = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+
   return (
     <div className="container mt-4">
       <h3 className="mb-3">Quản lý sách</h3>
@@ -78,7 +93,7 @@ export default function QuanLySach() {
           </tr>
         </thead>
         <tbody>
-          {sachList.map((s) => (
+          {paginatedData.map((s) => (
             <tr key={s.id}>
               <td>{s.ten}</td>
               <td>{s.tacgia}</td>
@@ -92,6 +107,25 @@ export default function QuanLySach() {
           ))}
         </tbody>
       </table>
+
+      {/* Thanh phân trang */}
+      {totalPages > 1 && (
+        <nav>
+          <ul className="pagination justify-content-center">
+            <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
+              <button className="page-link" onClick={() => changePage(currentPage - 1)}>Trước</button>
+            </li>
+            {Array.from({ length: totalPages }, (_, i) => (
+              <li key={i + 1} className={`page-item ${currentPage === i + 1 ? "active" : ""}`}>
+                <button className="page-link" onClick={() => changePage(i + 1)}>{i + 1}</button>
+              </li>
+            ))}
+            <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
+              <button className="page-link" onClick={() => changePage(currentPage + 1)}>Tiếp</button>
+            </li>
+          </ul>
+        </nav>
+      )}
 
       <AddSachModal show={showAdd} onClose={() => setShowAdd(false)} onSave={handleAdd} />
       {editSach && (
