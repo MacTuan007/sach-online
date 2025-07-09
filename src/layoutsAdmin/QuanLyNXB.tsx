@@ -10,10 +10,10 @@ import {
     remove,
     update
 } from "firebase/database";
-import Header from "../partialsAdmin/Sidebar";
 import EditItemModal from "../modals/EditItem";
 import AddItemModal from "../modals/AddItem";
 import type { NXB } from "../interfaces/NXB";
+import AdminLayout from "./AdminLayout";
 
 export default function QuanLyNXB() {
     const [NXBList, setNXBList] = useState<NXB[]>([]);
@@ -99,8 +99,7 @@ export default function QuanLyNXB() {
     };
 
     return (
-        <>
-            <Header />
+        <AdminLayout>
             <h2 className="text-center mt-3">Quản lý nhà xuất bản</h2>
 
             <div className="d-flex justify-content-end mb-3 me-3">
@@ -173,6 +172,6 @@ export default function QuanLyNXB() {
                 excludeFields={["id"]}
                 title="Chỉnh sửa nhà xuất bản"
             />
-        </>
+        </AdminLayout>
     );
 }

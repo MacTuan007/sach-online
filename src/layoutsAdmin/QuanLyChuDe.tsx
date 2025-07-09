@@ -11,9 +11,9 @@ import {
     remove,
     update
 } from "firebase/database";
-import Header from "../partialsAdmin/Sidebar";
 import EditItemModal from "../modals/EditItem";
 import AddItemModal from "../modals/AddItem";
+import AdminLayout from "./AdminLayout";
 
 export default function QuanLyChuDe() {
     const [chudeList, setChudeList] = useState<Chude[]>([]);
@@ -99,76 +99,70 @@ export default function QuanLyChuDe() {
     };
 
     return (
-        <>
-            <Header />
+        <AdminLayout>
             <h2 className="text-center mt-3">Quản lý chủ đề</h2>
-            <div className="d-flex justify-content-end mb-3 me-3">
-                <button className="btn btn-success" onClick={() => setShowAddModal(true)}>
-                    Thêm chủ đề
-                </button>
-            </div>
 
-            {loading ? (
-                <div className="text-center py-5">
-                    <div className="spinner-border text-primary" role="status"></div>
-                    <p className="mt-3">Đang tải dữ liệu...</p>
+                <div className="d-flex justify-content-end mb-3 me-3">
+                    <button className="btn btn-success" onClick={() => setShowAddModal(true)}>
+                        Thêm chủ đề
+                    </button>
                 </div>
-            ) : (
-                <table className="table table-bordered">
-                    <thead className="table-light">
-                        <tr>
-                            <th className="text-center">Tên chủ đề</th>
-                            <th className="text-center">Thao tác</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {chudeList.length > 0 ? (
-                            chudeList.map((chude) => (
-                                <tr key={chude.id}>
-                                    <td>{chude.ten}</td>
-                                    <td className="text-center">
-                                        <button
-                                            className="btn btn-sm btn-warning me-2"
-                                            onClick={() => handleEdit(chude)}
-                                        >
-                                            Sửa
-                                        </button>
-                                        <button
-                                            className="btn btn-sm btn-danger"
-                                            onClick={() => handleDelete(chude.id, chude.tenlink)}
-                                        >
-                                            Xoá
-                                        </button>
+
+                {loading ? (
+                    <div className="text-center py-5">
+                        <div className="spinner-border text-primary" role="status"></div>
+                        <p className="mt-3">Đang tải dữ liệu...</p>
+                    </div>
+                ) : (
+                    <table className="table table-bordered">
+                        <thead className="table-light">
+                            <tr>
+                                <th className="text-center">Tên chủ đề</th>
+                                <th className="text-center">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {chudeList.length > 0 ? (
+                                chudeList.map((chude) => (
+                                    <tr key={chude.id}>
+                                        <td>{chude.ten}</td>
+                                        <td className="text-center">
+                                            <button className="btn btn-sm btn-warning me-2" onClick={() => handleEdit(chude)}>
+                                                Sửa
+                                            </button>
+                                            <button className="btn btn-sm btn-danger" onClick={() => handleDelete(chude.id, chude.tenlink)}>
+                                                Xoá
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan={2} className="text-center">
+                                        Không có chủ đề nào.
                                     </td>
                                 </tr>
-                            ))
-                        ) : (
-                            <tr>
-                                <td colSpan={2} className="text-center">
-                                    Không có chủ đề nào.
-                                </td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
-            )}
+                            )}
+                        </tbody>
+                    </table>
+                )}
 
-            <AddItemModal<Chude>
-                show={showAddModal}
-                onClose={() => setShowAddModal(false)}
-                onSave={handleAdd}
-                fields={["ten", "tenlink"]}
-                title="Thêm chủ đề mới"
-            />
+                <AddItemModal<Chude>
+                    show={showAddModal}
+                    onClose={() => setShowAddModal(false)}
+                    onSave={handleAdd}
+                    fields={["ten", "tenlink"]}
+                    title="Thêm chủ đề mới"
+                />
 
-            <EditItemModal<Chude>
-                show={showModal}
-                onClose={() => setShowModal(false)}
-                onSave={handleSave}
-                item={selectedChude!}
-                excludeFields={["id"]}
-                title="Chỉnh sửa chủ đề"
-            />
-        </>
+                <EditItemModal<Chude>
+                    show={showModal}
+                    onClose={() => setShowModal(false)}
+                    onSave={handleSave}
+                    item={selectedChude!}
+                    excludeFields={["id"]}
+                    title="Chỉnh sửa chủ đề"
+                />
+        </AdminLayout>
     );
 }

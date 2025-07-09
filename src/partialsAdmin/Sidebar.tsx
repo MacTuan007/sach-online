@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 
 export default function Sidebar() {
     return (
-        <div className="d-flex flex-column flex-shrink-0 p-3 text-white bg-primary" style={{ width: "250px", height: "100vh", position: "fixed" }}>
+        <div className="d-flex flex-column flex-shrink-0 p-3 text-white bg-primary" style={{ width: "250px", minHeight: "100vh", background: "#f8f9fa" }}>
             <h5 className="text-white">Quản trị</h5>
             <hr />
             <ul className="nav nav-pills flex-column mb-auto">
