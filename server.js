@@ -74,7 +74,7 @@ app.post('/create_payment', async (req, res) => {
   let locale = "vn";
   let currCode = "VND";
 
-  const { amount, sachList } = req.body;
+  const { amount } = req.body;
   let vnp_Params = {
     vnp_Version: "2.1.0",
     vnp_Command: "pay",
