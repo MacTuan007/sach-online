@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      '/api/send-email': 'https://localhost:5000/',
+      '/api/send-email': 'https://sach-online.onrender.com',
     },
     host : true,
     port : 5000,

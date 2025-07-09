@@ -66,7 +66,7 @@ export default function ShoppingPage() {
         const totalAmount = sachList.reduce((total, item) => total + item.giatien * item.soluong, 0);
 
         try {
-            const response = await fetch('https://localhost:5000/create_payment', {
+            const response = await fetch('https://sach-online.onrender.com/create_payment', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -81,7 +81,7 @@ export default function ShoppingPage() {
 
             if (data.paymentUrl) {
                 console.log("👉 Redirecting to:", data.paymentUrl)
-                window.location.href =data.paymentUrl;
+                window.location.href = data.paymentUrl;
             } else {
                 alert('Tạo thanh toán thất bại');
             }
@@ -95,80 +95,80 @@ export default function ShoppingPage() {
         <>
             <Header />
             <div className="container mt-4">
-                <h3 className="text-center mb-3">Giỏ hàng</h3>
+                <h3 className="text-center mb-3">🛒 Giỏ hàng</h3>
 
                 {sachList.length === 0 ? (
-                    <table className="table table-bordered">
-                        <thead className="table-light">
-                            <tr>
-                                <th>Tên sách</th>
-                                <th className="text-center">Hình ảnh</th>
-                                <th className="text-center">Số lượng</th>
-                                <th className="text-end">Giá tiền</th>
-                                <th className="text-end">Thành tiền</th>
-                                <th className="text-center">Thao tác</th>
-                            </tr>
-                        </thead>
-                    </table>
+                    <div className="alert alert-info text-center">Giỏ hàng trống</div>
                 ) : (
                     <>
-                        <table className="table table-bordered">
-                            <thead className="table-light">
-                                <tr>
-                                    <th>Tên sách</th>
-                                    <th className="text-center">Hình ảnh</th>
-                                    <th className="text-center">Số lượng</th>
-                                    <th className="text-end">Giá tiền</th>
-                                    <th className="text-end">Thành tiền</th>
-                                    <th className="text-center">Thao tác</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {sachList.map((sach) => (
-                                    <tr key={sach.id}>
-                                        <td>{sach.ten}</td>
-                                        <th className="text-center"><Link to={`/sanpham/${sach.id}`}><img src={sach.image}></img></Link></th>
-                                        <td className="text-center">
-                                            <button
-                                                className="btn btn-sm btn-secondary me-1"
-                                                onClick={() => handleQuantityChange(sach.id, -1)}
-                                            >
-                                                -
-                                            </button>
-                                            {sach.soluong}
-                                            <button
-                                                className="btn btn-sm btn-secondary ms-1"
-                                                onClick={() => handleQuantityChange(sach.id, 1)}
-                                            >
-                                                +
-                                            </button>
-                                        </td>
-                                        <td className="text-end">{sach.giatien.toLocaleString()} ₫</td>
-                                        <td className="text-end">{(sach.giatien * sach.soluong).toLocaleString()} ₫</td>
-                                        <td className="text-center">
-                                            <button
-                                                className="btn btn-danger btn-sm"
-                                                onClick={() => handleRemove(sach.id)}
-                                            >
-                                                Xoá
-                                            </button>
+                        <div className="table-responsive">
+                            <table className="table table-bordered align-middle text-nowrap">
+                                <thead className="table-light text-center">
+                                    <tr>
+                                        <th>Tên sách</th>
+                                        <th className="d-none d-md-table-cell">Hình ảnh</th>
+                                        <th>Số lượng</th>
+                                        <th>Giá tiền</th>
+                                        <th>Thành tiền</th>
+                                        <th className="d-none d-md-table-cell">Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {sachList.map((sach) => (
+                                        <tr key={sach.id}>
+                                            <td>{sach.ten}</td>
+                                            <td className="text-center d-none d-md-table-cell">
+                                                <Link to={`/sanpham/${sach.id}`}>
+                                                    <img
+                                                        src={sach.image}
+                                                        alt={sach.ten}
+                                                        style={{ width: "80px", height: "auto", objectFit: "cover" }}
+                                                    />
+                                                </Link>
+                                            </td>
+                                            <td className="text-center">
+                                                <div className="d-flex justify-content-center align-items-center gap-2">
+                                                    <button
+                                                        className="btn btn-sm btn-outline-secondary"
+                                                        onClick={() => handleQuantityChange(sach.id, -1)}
+                                                    >
+                                                        −
+                                                    </button>
+                                                    <span>{sach.soluong}</span>
+                                                    <button
+                                                        className="btn btn-sm btn-outline-secondary"
+                                                        onClick={() => handleQuantityChange(sach.id, 1)}
+                                                    >
+                                                        +
+                                                    </button>
+                                                </div>
+                                            </td>
+                                            <td className="text-end">{sach.giatien.toLocaleString()} ₫</td>
+                                            <td className="text-end">{(sach.giatien * sach.soluong).toLocaleString()} ₫</td>
+                                            <td className="text-center d-none d-md-table-cell">
+                                                <button
+                                                    className="btn btn-sm btn-danger"
+                                                    onClick={() => handleRemove(sach.id)}
+                                                >
+                                                    Xoá
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+
+                                    <tr>
+                                        <td colSpan={3} className="text-end fw-bold">Tổng cộng:</td>
+                                        <td className="text-end fw-bold" colSpan={2}>
+                                            {sachList.reduce((total, item) => total + item.giatien * item.soluong, 0).toLocaleString()} ₫
                                         </td>
                                     </tr>
-                                ))}
-                                {/* Hàng tổng cộng */}
-                                <tr>
-                                    <td colSpan={3} className="text-end fw-bold">Tổng cộng:</td>
-                                    <td className="text-end fw-bold">
-                                        {sachList.reduce((total, item) => total + item.giatien * item.soluong, 0).toLocaleString()} ₫
-                                    </td>
-                                    <td></td>
-                                </tr>
-                            </tbody>
-                        </table>
+                                </tbody>
+                            </table>
+                        </div>
 
-                        <div className="text-end">
-                            <button className="btn btn-success" onClick={handleConfirm}>
-                                Xác nhận
+                        <div className="text-end mt-3">
+                            <button className="btn btn-success px-4" onClick={handleConfirm}>
+                                Xác nhận thanh toán
                             </button>
                         </div>
                     </>

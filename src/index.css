@@ -42,3 +42,12 @@ body {
         width: 100%;
     }
 }
+
+img {
+    border-radius: 6px;
+    transition: transform 0.2s ease;
+}
+
+img:hover {
+    transform: scale(1.05);
+}
