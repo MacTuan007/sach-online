@@ -1,7 +1,16 @@
 import { useEffect, useState } from "react";
 import { db } from "../firebase";
-import { equalTo, get, onValue, orderByChild, push, query, ref, remove, update } from "firebase/database";
-import Header from "../partialsAdmin/Header";
+import {
+    equalTo,
+    get,
+    orderByChild,
+    push,
+    query,
+    ref,
+    remove,
+    update
+} from "firebase/database";
+import Header from "../partialsAdmin/Sidebar";
 import EditItemModal from "../modals/EditItem";
 import AddItemModal from "../modals/AddItem";
 import type { NXB } from "../interfaces/NXB";
@@ -11,30 +20,37 @@ export default function QuanLyNXB() {
     const [selectedNXB, setSelectedNXB] = useState<NXB | null>(null);
     const [showModal, setShowModal] = useState(false);
     const [showAddModal, setShowAddModal] = useState(false);
-
+    const [loading, setLoading] = useState(true);
 
     const fetchNXBList = async () => {
-        const snapshot = await get(ref(db, "NXB"));
-        const data = snapshot.val();
-        if (data) {
-            const list = Object.entries(data).map(([id, value]) => ({
-                id,
-                ...(value as Omit<NXB, "id">),
-            }));
-            setNXBList(list);
-        } else {
-            setNXBList([]);
+        setLoading(true);
+        try {
+            const snapshot = await get(ref(db, "NXB"));
+            const data = snapshot.val();
+            if (data) {
+                const list = Object.entries(data).map(([id, value]) => ({
+                    id,
+                    ...(value as Omit<NXB, "id">),
+                }));
+                setNXBList(list);
+            } else {
+                setNXBList([]);
+            }
+        } catch (error) {
+            console.error("Lỗi khi tải NXB:", error);
+        } finally {
+            setLoading(false);
         }
-    };
-
-    const handleEdit = (NXB: NXB) => {
-        setSelectedNXB(NXB);
-        setShowModal(true);
     };
 
     useEffect(() => {
         fetchNXBList();
     }, []);
+
+    const handleEdit = (NXB: NXB) => {
+        setSelectedNXB(NXB);
+        setShowModal(true);
+    };
 
     const handleSave = async (updatedNXB: NXB) => {
         try {
@@ -49,6 +65,7 @@ export default function QuanLyNXB() {
             alert("Cập nhật thất bại.");
         }
     };
+
     const handleAdd = async (newNXB: Omit<NXB, "id">) => {
         try {
             await push(ref(db, "NXB"), newNXB);
@@ -60,70 +77,92 @@ export default function QuanLyNXB() {
         }
     };
 
-    const handleDelete = async (id: string, NXB: string) => {
-        const sachQuery = query(ref(db, 'Sach'), orderByChild('nxb'), equalTo(NXB));
-        onValue(sachQuery, (snapshot) => {
-            const data = snapshot.val();
-            if (data) {
-                alert("Còn sách thuộc nhà xuất bản này!!!");
+    const handleDelete = async (id: string, tenlink: string) => {
+        const confirmed = window.confirm("Bạn có chắc muốn xoá nhà xuất bản này?");
+        if (!confirmed) return;
+
+        try {
+            const sachQuery = query(ref(db, 'Sach'), orderByChild('nxb'), equalTo(tenlink));
+            const snapshot = await get(sachQuery);
+            if (snapshot.exists()) {
+                alert("Không thể xoá: Vẫn còn sách thuộc nhà xuất bản này.");
                 return;
-            } else {
-                remove(ref(db, `NXB/${id}`));
-                alert("Đã xoá thành công");
             }
-        });
-    }
+
+            await remove(ref(db, `NXB/${id}`));
+            alert("Đã xoá thành công!");
+            fetchNXBList();
+        } catch (error) {
+            console.error("Lỗi khi xoá:", error);
+            alert("Xoá thất bại.");
+        }
+    };
+
     return (
         <>
             <Header />
             <h2 className="text-center mt-3">Quản lý nhà xuất bản</h2>
+
             <div className="d-flex justify-content-end mb-3 me-3">
                 <button
                     className="btn btn-success"
-                    onClick={() => {
-                        setShowAddModal(true);
-                    }}
+                    onClick={() => setShowAddModal(true)}
                 >
                     Thêm nhà xuất bản mới
                 </button>
             </div>
-            <table className="table table-bordered">
-                <thead className="table-light">
-                    <tr>
-                        <th className="text-center">Tên nhà xuất bản</th>
-                        <th className="text-center">Thao tác</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {NXBList.map((NXB) => (
-                        <tr key={NXB.id}>
-                            <td>{NXB.ten}</td>
-                            <td className="text-center">
-                                <td className="text-center">
-                                    <button
-                                        className="btn btn-sm btn-secondary me-1"
-                                        onClick={() => handleEdit(NXB)}
-                                    >
-                                        Sửa
-                                    </button>
-                                    <button
-                                        className="btn btn-sm btn-secondary ms-1"
-                                        onClick={() => handleDelete(NXB.id, NXB.tenlink)}
-                                    >
-                                        Xoá
-                                    </button>
-                                </td>
-                            </td>
+
+            {loading ? (
+                <div className="text-center py-5">
+                    <div className="spinner-border text-primary" role="status"></div>
+                    <p className="mt-3">Đang tải dữ liệu...</p>
+                </div>
+            ) : (
+                <table className="table table-bordered">
+                    <thead className="table-light">
+                        <tr>
+                            <th className="text-center">Tên nhà xuất bản</th>
+                            <th className="text-center">Thao tác</th>
                         </tr>
-                    ))}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {NXBList.length > 0 ? (
+                            NXBList.map((NXB) => (
+                                <tr key={NXB.id}>
+                                    <td>{NXB.ten}</td>
+                                    <td className="text-center">
+                                        <button
+                                            className="btn btn-sm btn-warning me-2"
+                                            onClick={() => handleEdit(NXB)}
+                                        >
+                                            Sửa
+                                        </button>
+                                        <button
+                                            className="btn btn-sm btn-danger"
+                                            onClick={() => handleDelete(NXB.id, NXB.tenlink)}
+                                        >
+                                            Xoá
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))
+                        ) : (
+                            <tr>
+                                <td colSpan={2} className="text-center">
+                                    Không có nhà xuất bản nào.
+                                </td>
+                            </tr>
+                        )}
+                    </tbody>
+                </table>
+            )}
+
             <AddItemModal<NXB>
                 show={showAddModal}
                 onClose={() => setShowAddModal(false)}
                 onSave={handleAdd}
                 fields={["ten", "tenlink"]}
-                title="Thêm chủ nhà xuất bản mới"
+                title="Thêm nhà xuất bản mới"
             />
 
             <EditItemModal<NXB>
@@ -132,8 +171,8 @@ export default function QuanLyNXB() {
                 onSave={handleSave}
                 item={selectedNXB!}
                 excludeFields={["id"]}
-                title="Chỉnh sửa nhà xuất bản đề"
+                title="Chỉnh sửa nhà xuất bản"
             />
         </>
-    )
+    );
 }
