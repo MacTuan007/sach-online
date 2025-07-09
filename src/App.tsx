@@ -10,7 +10,6 @@ import QuanLyChuDe from './layoutsAdmin/QuanLyChuDe.tsx';
 import ChiTietPage from './layouts/ChiTietPage.tsx';
 import QuanLyNXB from './layoutsAdmin/QuanLyNXB.tsx';
 // import QuanLySach from './layoutsAdmin/QuanLySach.tsx';
-import MerchantSite from './layouts/MerchantSite.tsx';
 import ResultPage from './layouts/ResultPage.tsx';
 
 export default function App() {
@@ -24,7 +23,6 @@ export default function App() {
         <Route path='/DangNhap' element={<DangNhap />} />
         <Route path='/sanpham/:id' element={<ChiTietPage />} />
         <Route path='/Shopping' element={<ShoppingPage />} />
-        <Route path='/Merchant' element={<MerchantSite />} />
         <Route path='/Admin' element={<IndexAdmin />} />
         <Route path='/Admin/Chude' element={<QuanLyChuDe />} />
         <Route path='/Admin/NXB' element={<QuanLyNXB />} />

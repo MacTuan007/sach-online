@@ -10,67 +10,58 @@ import Footer from '../partials/Footer';
 import type { Sach } from '../interfaces/Sach';
 
 export default function NhaXuatBanPage() {
-  const { NXB } = useParams();
-  const [NXBList, setNXBList] = useState<Sach[]>([]);
-  const [tenNXB, settenNXB] = useState<String>();
+  const { NXB: nxbParam } = useParams();
+  const [sachList, setSachList] = useState<Sach[]>([]);
+  const [tenNXB, setTenNXB] = useState<string>('');
   const [currentPage, setCurrentPage] = useState(1);
+
   const itemsPerPage = 8;
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentSachList = NXBList.slice(startIndex, endIndex);
-  const totalPages = Math.ceil(NXBList.length / itemsPerPage);
-  if (!NXB) {
-    useEffect(() => {
-      const NXBRef = ref(db, `Sach`);
-      const unsubscribe = onValue(NXBRef, (snapshot) => {
-        const data = snapshot.val();
-        if (data) {
-          const list = Object.values(data) as Sach[];
-          setNXBList(list);
-        } else {
-          setNXBList([]);
-        }
-      });
+  const currentSachList = sachList.slice(startIndex, endIndex);
+  const totalPages = Math.ceil(sachList.length / itemsPerPage);
 
-      return () => unsubscribe();
-    }, [NXB]);
-  }
-  else {
-    useEffect(() => {
-      if (!NXB) return;
-
-      const sachQuery = query(ref(db, 'Sach'), orderByChild('nxb'), equalTo(NXB));
-
-      const unsubscribe = onValue(sachQuery, (snapshot) => {
-        const data = snapshot.val();
-        if (data) {
-          const list = Object.values(data) as Sach[];
-          setNXBList(list);
-        } else {
-          setNXBList([]);
-        }
-      });
-
-      return () => unsubscribe();
-    }, [tenNXB]);
-  }
-
+  // Lấy danh sách sách theo nhà xuất bản
   useEffect(() => {
-    if (NXB) {
-      const chudeRef = ref(db, `NXB`);
-      const chudeQuery = query(chudeRef, orderByChild('tenlink'), equalTo(NXB || ''));
-      const unsubscribe = onValue(chudeQuery, (snapshot) => {
-        const chudeData = snapshot.val();
-        if (chudeData) {
-          const chudeList = Object.values(chudeData) as { ten: string }[];
-          if (chudeList.length > 0) {
-            settenNXB(chudeList[0].ten);
-          }
-        }
-      });
-      return () => unsubscribe();
+    let sachRef;
+    if (!nxbParam) {
+      sachRef = ref(db, "Sach");
+    } else {
+      sachRef = query(ref(db, "Sach"), orderByChild("nxb"), equalTo(nxbParam));
     }
-  }, [NXB]);
+
+    const unsubscribe = onValue(sachRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        const list = Object.values(data) as Sach[];
+        setSachList(list);
+      } else {
+        setSachList([]);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [nxbParam]);
+
+  // Lấy tên nhà xuất bản từ đường dẫn (nếu có)
+  useEffect(() => {
+    if (!nxbParam) return;
+
+    const nxbRef = ref(db, "NXB");
+    const nxbQuery = query(nxbRef, orderByChild("tenlink"), equalTo(nxbParam));
+
+    const unsubscribe = onValue(nxbQuery, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        const values = Object.values(data) as { ten: string }[];
+        if (values.length > 0) {
+          setTenNXB(values[0].ten);
+        }
+      }
+    });
+
+    return () => unsubscribe();
+  }, [nxbParam]);
 
   const handleAddToCart = (idSach: string) => {
     const email = localStorage.getItem('emailKey');
@@ -78,6 +69,7 @@ export default function NhaXuatBanPage() {
       alert("Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng.");
       return;
     }
+
     const gioHangRef = ref(db, `GioHang/${email}/${idSach}`);
     get(gioHangRef).then((snapshot) => {
       if (snapshot.exists()) {
@@ -93,8 +85,6 @@ export default function NhaXuatBanPage() {
     });
   };
 
-
-
   return (
     <>
       <Header />
@@ -108,7 +98,9 @@ export default function NhaXuatBanPage() {
             <NhaXuatBanPartial />
           </div>
           <div className="col-9">
-            <h2 className="text-center">Sách theo nhà xuất bản: {tenNXB}</h2>
+            <h2 className="text-center">
+              {nxbParam ? `Sách theo nhà xuất bản: ${tenNXB}` : 'Tất cả sách'}
+            </h2>
             <div className="row">
               {currentSachList.length > 0 ? (
                 <>
@@ -126,24 +118,26 @@ export default function NhaXuatBanPage() {
                       </div>
                     </div>
                   ))}
-                  <nav className="mt-4 w-100">
-                    <ul className="pagination justify-content-center">
-                      <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
-                        <button className="page-link" onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}>Trước</button>
-                      </li>
-                      {Array.from({ length: totalPages }, (_, index) => (
-                        <li key={index} className={`page-item ${currentPage === index + 1 ? "active" : ""}`}>
-                          <button className="page-link" onClick={() => setCurrentPage(index + 1)}>{index + 1}</button>
+                  {totalPages > 1 && (
+                    <nav className="mt-4 w-100">
+                      <ul className="pagination justify-content-center">
+                        <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
+                          <button className="page-link" onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}>Trước</button>
                         </li>
-                      ))}
-                      <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
-                        <button className="page-link" onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}>Sau</button>
-                      </li>
-                    </ul>
-                  </nav>
+                        {Array.from({ length: totalPages }, (_, index) => (
+                          <li key={index} className={`page-item ${currentPage === index + 1 ? "active" : ""}`}>
+                            <button className="page-link" onClick={() => setCurrentPage(index + 1)}>{index + 1}</button>
+                          </li>
+                        ))}
+                        <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
+                          <button className="page-link" onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}>Sau</button>
+                        </li>
+                      </ul>
+                    </nav>
+                  )}
                 </>
               ) : (
-                <h4 className='text-center'>Không có sách nào.</h4>
+                <h4 className="text-center">Không có sách nào.</h4>
               )}
             </div>
           </div>

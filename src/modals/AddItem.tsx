@@ -8,6 +8,14 @@ type AddItemModalProps<T> = {
     title?: string;
 };
 
+// Hàm format nhãn từ tên biến
+function formatLabel(label: string | number | symbol): string {
+    return String(label)
+        .replace(/([a-z])([A-Z])/g, "$1 $2")  // camelCase -> camel Case
+        .replace(/_/g, " ")                  // snake_case -> snake case
+        .replace(/\b\w/g, (l) => l.toUpperCase()); // capitalize
+}
+
 export default function AddItemModal<T extends Record<string, any>>({
     show,
     onClose,
@@ -43,8 +51,8 @@ export default function AddItemModal<T extends Record<string, any>>({
                     </div>
                     <div className="modal-body">
                         {fields.map((field) => (
-                            <div className="mb-3" key={field as string}>
-                                <label className="form-label">{String(field)}</label>
+                            <div className="mb-3" key={String(field)}>
+                                <label className="form-label">{formatLabel(field)}</label>
                                 <input
                                     type="text"
                                     className="form-control"

@@ -12,7 +12,7 @@ const moment = require("moment")
 const app = express();
 const PORT = 5000;
 
-app.use(cors({ origin: 'https://sach-online.onrender.com/' }));
+app.use(cors({ origin: 'https://localhost:5000/' }));
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'dist')));
 // Route gửi email
@@ -60,16 +60,14 @@ function sortObject(obj) {
   return sorted;
 }
 
-const pendingOrders = new Map();
 app.post('/create_payment', async (req, res) => {
   const tmnCode = "CFFD0BGK"; // Lấy từ VNPay .env
   const secretKey = "E5LTCMVQ0NADKODCFFVVX1MIG8UL5MMR"; // Lấy từ VNPay
 
-  const returnUrl = "https://sach-online.onrender.com/payment-result"; // Trang kết quả
+  const returnUrl = "https://localhost:5000/payment-result"; // Trang kết quả
   const vnp_Url = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
   let ipAddr = req.ip;
   let orderId = moment().format("YYYYMMDDHHmmss");
-  let bankCode = "NCB";
 
   let createDate = moment().format("YYYYMMDDHHmmss");
   let orderInfo = "Thanh_toan_don_hang";
@@ -91,7 +89,6 @@ app.post('/create_payment', async (req, res) => {
     vnp_IpAddr: ipAddr,
     vnp_CreateDate: createDate,
   };
-  // vnp_Params["vnp_BankCode"] = bankCode;
 
   vnp_Params = sortObject(vnp_Params);
 

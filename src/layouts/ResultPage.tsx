@@ -66,7 +66,7 @@ export default function ResultPage() {
             const sachList = (await Promise.all(sachPromises)).filter(Boolean) as Sach[];
             setSachList(sachList);
         });
-    }, [emailKey]);
+    }, [sachList, emailKey]);
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
         const status = params.get("vnp_ResponseCode");

@@ -5,7 +5,6 @@ import { db } from '../firebase';
 import { useNavigate } from 'react-router-dom';
 import bcrypt from "bcryptjs";
 
-
 export default function DangKy() {
     const navigate = useNavigate();
     const [khachhang, setkhachhang] = useState<KhachHang>({
@@ -19,6 +18,9 @@ export default function DangKy() {
     });
 
     const [password2, setPassword2] = useState<string>('');
+    const [showPassword, setShowPassword] = useState(false);
+    const [showPassword2, setShowPassword2] = useState(false);
+    const [error, setError] = useState('');
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setkhachhang({ ...khachhang, [e.target.id]: e.target.value });
@@ -26,27 +28,27 @@ export default function DangKy() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setError('');
 
-        // ✅ Kiểm tra rỗng
         for (const key in khachhang) {
             if ((khachhang as any)[key].trim() === '') {
-                alert("Vui lòng điền đầy đủ thông tin!");
+                setError("Vui lòng điền đầy đủ thông tin!");
                 return;
             }
         }
 
         if (khachhang.password.length < 6) {
-            alert('Mật khẩu phải có ít nhất 6 ký tự!');
+            setError('Mật khẩu phải có ít nhất 6 ký tự!');
             return;
         }
 
         if (khachhang.password !== password2) {
-            alert('Mật khẩu nhập lại không khớp!');
+            setError('Mật khẩu nhập lại không khớp!');
             return;
         }
 
         if (khachhang.phone.length < 10 || khachhang.phone.length > 11) {
-            alert('Số điện thoại phải có 10 hoặc 11 chữ số!');
+            setError('Số điện thoại phải có 10 hoặc 11 chữ số!');
             return;
         }
 
@@ -58,7 +60,7 @@ export default function DangKy() {
 
         const exists = await checkUsernameExists(khachhang.username);
         if (exists) {
-            alert("Tên đăng nhập đã tồn tại!");
+            setError("Tên đăng nhập đã tồn tại!");
             return;
         }
 
@@ -67,15 +69,12 @@ export default function DangKy() {
         khachhang.password = hashedPassword;
 
         try {
-            const KhachHangRef = ref(db, `KhachHang`);
-            await push(KhachHangRef, {
-                ...khachhang,
-            });
+            await push(ref(db, `KhachHang`), khachhang);
             alert('Đăng ký thành công!');
             handleReset();
             navigate("/DangNhap");
         } catch (err) {
-            alert('Đăng ký thất bại!');
+            setError("Đăng ký thất bại! Vui lòng thử lại.");
             console.error(err);
         }
     };
@@ -91,52 +90,94 @@ export default function DangKy() {
             address: '',
         });
         setPassword2('');
+        setError('');
     };
 
-
     return (
-        <>
-            <div className="container">
-                <h2>ĐĂNG KÝ THÀNH VIÊN</h2>
-                <form onSubmit={handleSubmit}>
-                    <div className="mb-3">
-                        <label htmlFor="name" className="form-label">Họ và tên</label>
-                        <input type="text" className="form-control" id="name" value={khachhang.name} onChange={handleChange} />
-                    </div>
-                    <div className="mb-3">
-                        <label htmlFor="username" className="form-label">Tên đăng nhập</label>
-                        <input type="text" className="form-control" id="username" value={khachhang.username} onChange={handleChange} />
-                    </div>
-                    <div className="mb-3">
-                        <label htmlFor="password" className="form-label">Mật khẩu</label>
-                        <input type="password" className="form-control" id="password" value={khachhang.password} onChange={handleChange} />
-                    </div>
-                    <div className="mb-3">
-                        <label htmlFor="password2" className="form-label">Nhập lại Mật khẩu</label>
-                        <input type="password" className="form-control" id="password2" value={password2} onChange={(e) => setPassword2(e.target.value)} />
-                    </div>
-                    <div className="mb-3">
-                        <label htmlFor="email" className="form-label">Email</label>
-                        <input type="Email" className="form-control" id="email" value={khachhang.email} onChange={handleChange} />
-                    </div>
-                    <div className="mb-3">
-                        <label htmlFor="phone" className="form-label">Điện thoại</label>
-                        <input type="phone" className="form-control" id="phone" value={khachhang.phone} onChange={handleChange} />
-                    </div>
-                    <div className="mb-3">
-                        <label htmlFor="birthday" className="form-label">Ngày sinh</label>
-                        <input type="date" className="form-control" id="birthday" value={khachhang.birthday} onChange={handleChange} />
-                    </div>
-                    <div className="mb-3">
-                        <label htmlFor="address" className="form-label">Địa chỉ</label>
-                        <input type="text" className="form-control" id="address" value={khachhang.address} onChange={handleChange} />
-                    </div>
-                    <ul className="list-group flex-row d-flex gap-2">
-                        <button type="submit" className="btn btn-primary">Đăng ký</button>
-                        <button type="button" className="btn btn-primary" onClick={handleReset}>Xoá thông tin</button>
-                    </ul>
-                </form>
+        <div className="container-fluid min-vh-100 d-flex justify-content-center align-items-center bg-light">
+            <div className="col-11 col-sm-10 col-md-8 col-lg-6 col-xl-5">
+                <div className="bg-white p-4 rounded shadow">
+                    <h2 className="text-center mb-4">Đăng ký thành viên</h2>
+
+                    {error && <div className="alert alert-danger">{error}</div>}
+
+                    <form onSubmit={handleSubmit}>
+                        {[
+                            { id: "name", label: "Họ và tên", type: "text", icon: "bi-person" },
+                            { id: "username", label: "Tên đăng nhập", type: "text", icon: "bi-person-badge" },
+                            { id: "email", label: "Email", type: "email", icon: "bi-envelope" },
+                            { id: "phone", label: "Điện thoại", type: "tel", icon: "bi-telephone" },
+                            { id: "birthday", label: "Ngày sinh", type: "date", icon: "bi-calendar" },
+                            { id: "address", label: "Địa chỉ", type: "text", icon: "bi-geo-alt" }
+                        ].map(({ id, label, type, icon }) => (
+                            <div className="mb-3" key={id}>
+                                <label htmlFor={id} className="form-label">{label}</label>
+                                <div className="input-group">
+                                    <span className="input-group-text"><i className={`bi ${icon}`}></i></span>
+                                    <input
+                                        type={type}
+                                        id={id}
+                                        className="form-control"
+                                        value={(khachhang as any)[id]}
+                                        onChange={handleChange}
+                                    />
+                                </div>
+                            </div>
+                        ))}
+
+                        {/* Password */}
+                        <div className="mb-3">
+                            <label htmlFor="password" className="form-label">Mật khẩu</label>
+                            <div className="input-group">
+                                <span className="input-group-text"><i className="bi bi-lock-fill"></i></span>
+                                <input
+                                    type={showPassword ? "text" : "password"}
+                                    id="password"
+                                    className="form-control"
+                                    value={khachhang.password}
+                                    onChange={handleChange}
+                                />
+                                <button
+                                    type="button"
+                                    className="btn btn-outline-secondary"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    tabIndex={-1}
+                                >
+                                    <i className={`bi ${showPassword ? "bi-eye-slash" : "bi-eye"}`}></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Nhập lại mật khẩu */}
+                        <div className="mb-4">
+                            <label htmlFor="password2" className="form-label">Nhập lại mật khẩu</label>
+                            <div className="input-group">
+                                <span className="input-group-text"><i className="bi bi-lock"></i></span>
+                                <input
+                                    type={showPassword2 ? "text" : "password"}
+                                    id="password2"
+                                    className="form-control"
+                                    value={password2}
+                                    onChange={(e) => setPassword2(e.target.value)}
+                                />
+                                <button
+                                    type="button"
+                                    className="btn btn-outline-secondary"
+                                    onClick={() => setShowPassword2(!showPassword2)}
+                                    tabIndex={-1}
+                                >
+                                    <i className={`bi ${showPassword2 ? "bi-eye-slash" : "bi-eye"}`}></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="d-flex justify-content-between">
+                            <button type="submit" className="btn btn-primary">Đăng ký</button>
+                            <button type="button" className="btn btn-secondary" onClick={handleReset}>Xoá thông tin</button>
+                        </div>
+                    </form>
+                </div>
             </div>
-        </>
+        </div>
     );
 }

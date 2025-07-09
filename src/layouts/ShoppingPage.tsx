@@ -62,43 +62,11 @@ export default function ShoppingPage() {
         setSachList((prev) => prev.filter((s) => s.id !== id));
     };
 
-    // const handleConfirm = async () => {
-    //     const email = localStorage.getItem('email');
-    //     try {
-    //         const response = await fetch('https://sach-online.onrender.com/api/send-email', {
-    //             method: 'POST',
-    //             headers: { 'Content-Type': 'application/json' },
-    //             body: JSON.stringify({
-    //                 email,
-    //                 order: sachList.map(item => ({
-    //                     ten: item.ten,
-    //                     soluong: item.soluong,
-    //                     giatien: item.giatien,
-    //                     thanhtien: item.soluong * item.giatien
-    //                 })),
-    //             }),
-    //         });
-
-    //         const data = await response.json();
-    //         alert(data.message);
-    //         const today = Date.now().toString();
-    //         const updates: Record<string, number> = {};
-    //         sachList.forEach(item => {
-    //             updates[`LichSuGiaoDich/${emailKey}/${today}/${item.id}`] = item.soluong;
-    //         });
-    //         await update(ref(db), updates);
-    //         await remove(ref(db, `GioHang/${emailKey}`));
-    //         navgate('/');
-    //     } catch (error) {
-    //         console.error('Lỗi gửi email:', error);
-    //         alert('Không gửi được email');
-    //     }
-    // };
     const handleConfirm = async () => {
         const totalAmount = sachList.reduce((total, item) => total + item.giatien * item.soluong, 0);
 
         try {
-            const response = await fetch('https://sach-online.onrender.com/create_payment', {
+            const response = await fetch('https://localhost:5000/create_payment', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
