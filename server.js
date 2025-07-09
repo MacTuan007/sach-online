@@ -60,7 +60,6 @@ function sortObject(obj) {
   return sorted;
 }
 
-const pendingOrders = new Map();
 app.post('/create_payment', async (req, res) => {
   const tmnCode = "CFFD0BGK"; // Lấy từ VNPay .env
   const secretKey = "E5LTCMVQ0NADKODCFFVVX1MIG8UL5MMR"; // Lấy từ VNPay
@@ -76,7 +75,7 @@ app.post('/create_payment', async (req, res) => {
   let locale = "vn";
   let currCode = "VND";
 
-  const { amount, sachList } = req.body;
+  const { amount } = req.body;
   let vnp_Params = {
     vnp_Version: "2.1.0",
     vnp_Command: "pay",
@@ -91,7 +90,6 @@ app.post('/create_payment', async (req, res) => {
     vnp_IpAddr: ipAddr,
     vnp_CreateDate: createDate,
   };
-  // vnp_Params["vnp_BankCode"] = bankCode;
 
   vnp_Params = sortObject(vnp_Params);
 
