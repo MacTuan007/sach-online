@@ -8,39 +8,11 @@ export default function ResultPage() {
     const navigate = useNavigate();
     const [sachList, setSachList] = useState<Sach[]>([]);
     const emailKey = localStorage.getItem('emailKey');
-    const sendEmail = async () => {
-        const email = localStorage.getItem('email');
-        try {
-            const response = await fetch('https://sach-online.onrender.com/api/send-email', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    email,
-                    order: sachList.map(item => ({
-                        ten: item.ten,
-                        soluong: item.soluong,
-                        giatien: item.giatien,
-                        thanhtien: item.soluong * item.giatien
-                    })),
-                }),
-            });
 
-            const data = await response.json();
-            alert(data.message);
-            const today = Date.now().toString();
-            const updates: Record<string, number> = {};
-            sachList.forEach(item => {
-                updates[`LichSuGiaoDich/${emailKey}/${today}/${item.id}`] = item.soluong;
-            });
-            await update(ref(db), updates);
-            await remove(ref(db, `GioHang/${emailKey}`));
-            navigate('/');
-        } catch (error) {
-            console.error('Lỗi gửi email:', error);
-            alert('Không gửi được email');
-        }
-    };
+    // ✅ 1. Load giỏ hàng từ Firebase
     useEffect(() => {
+        if (!emailKey) return;
+
         const cartRef = ref(db, `GioHang/${emailKey}`);
         get(cartRef).then(async (snapshot) => {
             const gioHangData = snapshot.val();
@@ -63,21 +35,71 @@ export default function ResultPage() {
                 return null;
             });
 
-            const sachList = (await Promise.all(sachPromises)).filter(Boolean) as Sach[];
-            setSachList(sachList);
+            const fetchedSachList = (await Promise.all(sachPromises)).filter(Boolean) as Sach[];
+            setSachList(fetchedSachList);
         });
-    }, [sachList, emailKey]);
+    }, [emailKey]); // ✅ Chỉ phụ thuộc emailKey
+
+    // ✅ 2. Gửi email khi thanh toán thành công và đã có danh sách
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
         const status = params.get("vnp_ResponseCode");
 
-        if (status === "00") {
+        if (status === "00" && sachList.length > 0) {
             sendEmail();
-        } else {
+        } else if (status !== "00") {
             alert("Thanh toán thất bại");
             navigate("/");
         }
-    }, [navigate]);
+    }, [sachList]); // ✅ Chỉ chạy khi sachList đã load xong
 
-    return <p>Đang xử lý...</p>;
+    // ✅ 3. Hàm gửi email + cập nhật lịch sử + xoá giỏ hàng
+    const sendEmail = async () => {
+        const email = localStorage.getItem('email');
+        if (!email) return;
+
+        try {
+            const response = await fetch('https://sach-online.onrender.com/api/send-email', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email,
+                    order: sachList.map(item => ({
+                        ten: item.ten,
+                        soluong: item.soluong,
+                        giatien: item.giatien,
+                        thanhtien: item.soluong * item.giatien
+                    })),
+                }),
+            });
+
+            const data = await response.json();
+            alert(data.message);
+
+            // ✅ Ghi vào Lịch sử giao dịch
+            const today = Date.now().toString();
+            const updates: Record<string, number> = {};
+            sachList.forEach(item => {
+                updates[`LichSuGiaoDich/${emailKey}/${today}/${item.id}`] = item.soluong;
+            });
+            await update(ref(db), updates);
+
+            // ✅ Xoá giỏ hàng
+            await remove(ref(db, `GioHang/${emailKey}`));
+            navigate('/');
+        } catch (error) {
+            console.error('Lỗi gửi email:', error);
+            alert('Không gửi được email');
+        }
+    };
+
+    return (
+        <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '50vh' }}>
+            <div className="text-center">
+                <div className="spinner-border text-success mb-3" role="status"></div>
+                <p>Đang xử lý đơn hàng, vui lòng chờ...</p>
+            </div>
+        </div>
+    );
+
 }
