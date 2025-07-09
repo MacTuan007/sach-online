@@ -65,7 +65,6 @@ export default function QuanLySach() {
     fetchSachList();
   };
 
-  // === PHÂN TRANG ===
   const totalPages = Math.ceil(sachList.length / itemsPerPage);
   const paginatedData = sachList.slice(
     (currentPage - 1) * itemsPerPage,
@@ -73,15 +72,17 @@ export default function QuanLySach() {
   );
 
   const changePage = (page: number) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-    }
+    if (page < 1 || page > totalPages) return;
+    setCurrentPage(page);
   };
 
   return (
     <div className="container mt-4">
       <h3 className="mb-3">Quản lý sách</h3>
-      <button className="btn btn-success mb-3" onClick={() => setShowAdd(true)}>+ Thêm sách</button>
+      <button className="btn btn-success mb-3" onClick={() => setShowAdd(true)}>
+        + Thêm sách
+      </button>
+
       <table className="table table-bordered">
         <thead className="table-light">
           <tr>
@@ -98,30 +99,53 @@ export default function QuanLySach() {
               <td>{s.ten}</td>
               <td>{s.tacgia}</td>
               <td>{s.giatien.toLocaleString()} ₫</td>
-              <td><img src={s.image} alt={s.ten} width={80} /></td>
               <td>
-                <button className="btn btn-primary btn-sm me-2" onClick={() => setEditSach(s)}>Sửa</button>
-                <button className="btn btn-danger btn-sm" onClick={() => handleDelete(s.id)}>Xoá</button>
+                <img src={s.image} alt={s.ten} width={80} />
+              </td>
+              <td>
+                <button
+                  className="btn btn-primary btn-sm me-2"
+                  onClick={() => setEditSach(s)}
+                >
+                  Sửa
+                </button>
+                <button
+                  className="btn btn-danger btn-sm"
+                  onClick={() => handleDelete(s.id)}
+                >
+                  Xoá
+                </button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
 
-      {/* Thanh phân trang */}
+      {/* Phân trang */}
       {totalPages > 1 && (
         <nav>
           <ul className="pagination justify-content-center">
             <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
-              <button className="page-link" onClick={() => changePage(currentPage - 1)}>Trước</button>
+              <button className="page-link" onClick={() => changePage(currentPage - 1)}>
+                Trước
+              </button>
             </li>
             {Array.from({ length: totalPages }, (_, i) => (
-              <li key={i + 1} className={`page-item ${currentPage === i + 1 ? "active" : ""}`}>
-                <button className="page-link" onClick={() => changePage(i + 1)}>{i + 1}</button>
+              <li
+                key={i + 1}
+                className={`page-item ${currentPage === i + 1 ? "active" : ""}`}
+              >
+                <button className="page-link" onClick={() => changePage(i + 1)}>
+                  {i + 1}
+                </button>
               </li>
             ))}
-            <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
-              <button className="page-link" onClick={() => changePage(currentPage + 1)}>Tiếp</button>
+            <li
+              className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}
+            >
+              <button className="page-link" onClick={() => changePage(currentPage + 1)}>
+                Tiếp
+              </button>
             </li>
           </ul>
         </nav>
