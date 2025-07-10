@@ -135,19 +135,21 @@ export default function ChiTietPage() {
                       <>{product.giatien?.toLocaleString() || 0} VND</>
                     )}
                   </li>
-                  <li>
-                    <strong>Chọn số lượng:</strong>{" "}
-                    <select
-                      className="form-select d-inline-block w-auto"
+                  <li className="d-flex align-items-center gap-2">
+                    <strong>Chọn số lượng:</strong>
+                    <input
+                      type="number"
+                      className="form-control w-auto"
                       value={quantity}
-                      onChange={(e) => setQuantity(Number(e.target.value))}
-                    >
-                      {Array.from({ length: product.soluong }, (_, i) => i + 1).map((num) => (
-                        <option key={num} value={num}>{num}</option>
-                      ))}
-                    </select>
-                    <span className="ms-2 text-muted">(Tối đa {product.soluong})</span>
+                      min={1}
+                      max={product.soluong}
+                      onChange={(e) => {
+                        const val = Number(e.target.value);
+                        if (val >= 1 && val <= product.soluong) setQuantity(val);
+                      }}
+                    />
                   </li>
+
 
                 </ul>
                 <button

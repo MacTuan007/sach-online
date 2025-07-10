@@ -151,24 +151,41 @@ export default function ShoppingPage() {
                                                 </Link>
                                             </td>
                                             <td className="text-center">
-                                                <div className="d-flex justify-content-center align-items-center gap-2">
-                                                    <button
-                                                        className="btn btn-sm btn-outline-secondary"
-                                                        onClick={() => handleQuantityChange(sach.id, -1)}
-                                                    >
-                                                        −
-                                                    </button>
-                                                    <span>{sach.soluong}</span>
-                                                    <button
-                                                        className="btn btn-sm btn-outline-secondary"
-                                                        onClick={() => handleQuantityChange(sach.id, 1)}
-                                                        disabled={sach.tonkho !== undefined && sach.soluong >= sach.tonkho}
-                                                    >
-                                                        +
-                                                    </button>
+                                                <input
+                                                    type="number"
+                                                    className="form-control text-center"
+                                                    style={{ width: "80px" }}
+                                                    value={sach.soluong}
+                                                    min={1}
+                                                    max={sach.tonkho}
+                                                    onChange={(e) => {
+                                                        const newVal = parseInt(e.target.value);
+                                                        if (isNaN(newVal)) return;
 
-                                                </div>
+                                                        if (newVal < 1) {
+                                                            alert("Số lượng tối thiểu là 1.");
+                                                            return;
+                                                        }
+                                                        if (sach.tonkho !== undefined && newVal > sach.tonkho) {
+                                                            alert(`Sách "${sach.ten}" chỉ còn ${sach.tonkho} quyển trong kho.`);
+                                                            return;
+                                                        }
+
+                                                        // Cập nhật giỏ hàng
+                                                        const newSachList = sachList.map((s) =>
+                                                            s.id === sach.id ? { ...s, soluong: newVal } : s
+                                                        );
+                                                        setSachList(newSachList);
+
+                                                        update(ref(db, `GioHang/${emailKey}`), {
+                                                            [sach.id]: newVal,
+                                                        }).catch((error) => {
+                                                            console.error("🔥 Không thể cập nhật giỏ hàng:", error);
+                                                        });
+                                                    }}
+                                                />
                                             </td>
+
                                             <td className="text-end">{sach.giatien.toLocaleString()} ₫</td>
                                             <td className="text-end">
                                                 {sach.khuyenmai
