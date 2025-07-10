@@ -1,21 +1,23 @@
 import { useNavigate } from "react-router-dom";
 import AdminLayout from "./AdminLayout";
 import { useEffect, useState } from "react";
-import { getDatabase, ref, get } from "firebase/database";
+import { ref, get } from "firebase/database";
+import { db } from "../firebase";
 
 type LichSuItem = {
     tenKhachHang: string;
     ngayGiaoDich: string;
-    timestamp: number; // 🛠️ Thêm dòng này
+    timestamp: number;
     sachDaMua: { ten: string; soluong: number; giatien: number }[];
     tongTien: number;
 };
+
 export default function IndexAdmin() {
     const navigate = useNavigate();
-    const admin = localStorage.getItem('admin');
-    if (admin !== 'true') {
-        navigate('/');
-        return null; // Trả về null nếu không phải admin
+    const admin = localStorage.getItem("admin");
+    if (admin !== "true") {
+        navigate("/");
+        return null;
     }
 
     const [data, setData] = useState<LichSuItem[]>([]);
@@ -26,23 +28,24 @@ export default function IndexAdmin() {
 
     useEffect(() => {
         const fetchData = async () => {
-            const db = getDatabase();
             const snapshot = await get(ref(db));
             const dbData = snapshot.val();
 
+            const khachHangRaw = dbData.KhachHang || {};
+            const sachData = dbData.Sach || {};
+            const lichSu = dbData.LichSuGiaoDich || {};
+
+            // ⚠️ Normalize email để map tên người dùng đúng với key trong LichSuGiaoDich
             const khachHangMap: Record<string, string> = {};
-            Object.entries(dbData.KhachHang || {}).forEach(([val]: any) => {
+            Object.values(khachHangRaw).forEach((val: any) => {
                 const emailKey = val.email.replace(/[^a-zA-Z0-9]/g, "");
                 khachHangMap[emailKey] = val.name;
             });
 
-            const lichSu = dbData.LichSuGiaoDich || {};
-            const sachData = dbData.Sach || {};
-
             const result: LichSuItem[] = [];
 
-            Object.entries(lichSu).forEach(([userId, giaoDichList]: any) => {
-                const tenKhachHang = khachHangMap[userId] || userId;
+            Object.entries(lichSu).forEach(([userEmailKey, giaoDichList]: any) => {
+                const tenKhachHang = khachHangMap[userEmailKey] || "Khách không xác định";
 
                 Object.entries(giaoDichList).forEach(([timestampStr, books]: any) => {
                     const timestamp = Number(timestampStr);
@@ -66,7 +69,7 @@ export default function IndexAdmin() {
 
             const sorted = result.sort((a, b) => b.timestamp - a.timestamp);
             setData(sorted);
-            setFilteredData(sorted); // default
+            setFilteredData(sorted);
         };
 
         fetchData();
@@ -91,7 +94,7 @@ export default function IndexAdmin() {
         }
 
         setFilteredData(newData);
-        setLimit(6); // reset limit khi lọc mới
+        setLimit(6);
     }, [selectedMonth, selectedYear, data]);
 
     const handleXemThem = () => {
