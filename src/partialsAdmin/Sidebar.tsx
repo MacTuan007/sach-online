@@ -1,6 +1,13 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function Sidebar() {
+    const navigate = useNavigate();
+    const handleLogout = () => {
+        localStorage.removeItem('email');
+        localStorage.removeItem('emailKey');
+        localStorage.removeItem('admin');
+        navigate('/');
+    };
     return (
         <div className="d-flex flex-column flex-shrink-0 p-3 text-white bg-primary" style={{ width: "250px", minHeight: "100vh", background: "#f8f9fa" }}>
             <h5 className="text-white">Quản trị</h5>
@@ -25,6 +32,11 @@ export default function Sidebar() {
                     <Link to="/Admin/Sach" className="nav-link text-white">
                         Sách
                     </Link>
+                </li>
+                <li className="nav-item">
+                    <button className="btn btn-link nav-link" onClick={handleLogout}>
+                        Đăng xuất
+                    </button>
                 </li>
             </ul>
         </div>

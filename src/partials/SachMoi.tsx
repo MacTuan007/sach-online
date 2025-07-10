@@ -73,7 +73,7 @@ export default function SachMoi() {
                     {sach.khuyenmai && sach.khuyenmai > 0 && sach.khuyenmai < sach.giatien! ? (
                       <p className="text-danger mb-1">
                         <span className="text-muted text-decoration-line-through me-2">
-                          {sach.giatien?.toLocaleString()} VND
+                          {sach.giatien?.toLocaleString()}
                         </span>
                         {sach.khuyenmai.toLocaleString()} VND
                       </p>
