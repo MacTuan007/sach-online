@@ -29,7 +29,22 @@ export default function DangNhap() {
                 return;
             }
         }
-
+        const a = query(ref(db, 'Admin'), orderByChild('username'), equalTo(khachhang.username));
+        const adminSnapshot = await get(a);
+        if (adminSnapshot.exists()) {
+            const adminData = adminSnapshot.val();
+            const Admin = Object.values(adminData)[0] as any;
+            const isMatch = await bcrypt.compare(khachhang.password, Admin.password);
+            if (isMatch) {
+                localStorage.setItem('admin', 'true');
+                navigate('/admin');
+                return;
+            }
+            else {
+                setError("Tài khoản hoặc mật khẩu không đúng!");
+                return;
+            }
+        }
         const q = query(ref(db, 'KhachHang'), orderByChild('username'), equalTo(khachhang.username));
         const snapshot = await get(q);
         if (snapshot.exists()) {
@@ -48,6 +63,7 @@ export default function DangNhap() {
             setError("Tên đăng nhập không tồn tại!");
         }
     };
+
 
     return (
         <>

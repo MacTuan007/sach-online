@@ -4,6 +4,7 @@ import { ref, push, orderByChild, equalTo, query, get } from 'firebase/database'
 import { db } from '../firebase';
 import { useNavigate } from 'react-router-dom';
 import bcrypt from "bcryptjs";
+import Header from "../partials/Header";
 
 export default function DangKy() {
     const navigate = useNavigate();
@@ -109,90 +110,93 @@ export default function DangKy() {
     };
 
     return (
-        <div className="container-fluid min-vh-100 d-flex justify-content-center align-items-center bg-light">
-            <div className="col-11 col-sm-10 col-md-8 col-lg-6 col-xl-5">
-                <div className="bg-white p-4 rounded shadow">
-                    <h2 className="text-center mb-4">Đăng ký thành viên</h2>
+        <>
+            <Header />
+            <div className="container-fluid min-vh-100 d-flex justify-content-center align-items-center bg-light">
+                <div className="col-11 col-sm-10 col-md-8 col-lg-6 col-xl-5">
+                    <div className="bg-white p-4 rounded shadow">
+                        <h2 className="text-center mb-4">Đăng ký thành viên</h2>
 
-                    {error && <div className="alert alert-danger">{error}</div>}
+                        {error && <div className="alert alert-danger">{error}</div>}
 
-                    <form onSubmit={handleSubmit}>
-                        {[
-                            { id: "name", label: "Họ và tên", type: "text", icon: "bi-person" },
-                            { id: "username", label: "Tên đăng nhập", type: "text", icon: "bi-person-badge" },
-                            { id: "email", label: "Email", type: "email", icon: "bi-envelope" },
-                            { id: "phone", label: "Điện thoại", type: "tel", icon: "bi-telephone" },
-                            { id: "birthday", label: "Ngày sinh", type: "date", icon: "bi-calendar" },
-                            { id: "address", label: "Địa chỉ", type: "text", icon: "bi-geo-alt" }
-                        ].map(({ id, label, type, icon }) => (
-                            <div className="mb-3" key={id}>
-                                <label htmlFor={id} className="form-label">{label}</label>
+                        <form onSubmit={handleSubmit}>
+                            {[
+                                { id: "name", label: "Họ và tên", type: "text", icon: "bi-person" },
+                                { id: "username", label: "Tên đăng nhập", type: "text", icon: "bi-person-badge" },
+                                { id: "email", label: "Email", type: "email", icon: "bi-envelope" },
+                                { id: "phone", label: "Điện thoại", type: "tel", icon: "bi-telephone" },
+                                { id: "birthday", label: "Ngày sinh", type: "date", icon: "bi-calendar" },
+                                { id: "address", label: "Địa chỉ", type: "text", icon: "bi-geo-alt" }
+                            ].map(({ id, label, type, icon }) => (
+                                <div className="mb-3" key={id}>
+                                    <label htmlFor={id} className="form-label">{label}</label>
+                                    <div className="input-group">
+                                        <span className="input-group-text"><i className={`bi ${icon}`}></i></span>
+                                        <input
+                                            type={type}
+                                            id={id}
+                                            className="form-control"
+                                            value={(khachhang as any)[id]}
+                                            onChange={handleChange}
+                                        />
+                                    </div>
+                                </div>
+                            ))}
+
+                            {/* Password */}
+                            <div className="mb-3">
+                                <label htmlFor="password" className="form-label">Mật khẩu</label>
                                 <div className="input-group">
-                                    <span className="input-group-text"><i className={`bi ${icon}`}></i></span>
+                                    <span className="input-group-text"><i className="bi bi-lock-fill"></i></span>
                                     <input
-                                        type={type}
-                                        id={id}
+                                        type={showPassword ? "text" : "password"}
+                                        id="password"
                                         className="form-control"
-                                        value={(khachhang as any)[id]}
+                                        value={khachhang.password}
                                         onChange={handleChange}
                                     />
+                                    <button
+                                        type="button"
+                                        className="btn btn-outline-secondary"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        tabIndex={-1}
+                                    >
+                                        <i className={`bi ${showPassword ? "bi-eye-slash" : "bi-eye"}`}></i>
+                                    </button>
                                 </div>
                             </div>
-                        ))}
 
-                        {/* Password */}
-                        <div className="mb-3">
-                            <label htmlFor="password" className="form-label">Mật khẩu</label>
-                            <div className="input-group">
-                                <span className="input-group-text"><i className="bi bi-lock-fill"></i></span>
-                                <input
-                                    type={showPassword ? "text" : "password"}
-                                    id="password"
-                                    className="form-control"
-                                    value={khachhang.password}
-                                    onChange={handleChange}
-                                />
-                                <button
-                                    type="button"
-                                    className="btn btn-outline-secondary"
-                                    onClick={() => setShowPassword(!showPassword)}
-                                    tabIndex={-1}
-                                >
-                                    <i className={`bi ${showPassword ? "bi-eye-slash" : "bi-eye"}`}></i>
-                                </button>
+                            {/* Nhập lại mật khẩu */}
+                            <div className="mb-4">
+                                <label htmlFor="password2" className="form-label">Nhập lại mật khẩu</label>
+                                <div className="input-group">
+                                    <span className="input-group-text"><i className="bi bi-lock"></i></span>
+                                    <input
+                                        type={showPassword2 ? "text" : "password"}
+                                        id="password2"
+                                        className="form-control"
+                                        value={password2}
+                                        onChange={(e) => setPassword2(e.target.value)}
+                                    />
+                                    <button
+                                        type="button"
+                                        className="btn btn-outline-secondary"
+                                        onClick={() => setShowPassword2(!showPassword2)}
+                                        tabIndex={-1}
+                                    >
+                                        <i className={`bi ${showPassword2 ? "bi-eye-slash" : "bi-eye"}`}></i>
+                                    </button>
+                                </div>
                             </div>
-                        </div>
 
-                        {/* Nhập lại mật khẩu */}
-                        <div className="mb-4">
-                            <label htmlFor="password2" className="form-label">Nhập lại mật khẩu</label>
-                            <div className="input-group">
-                                <span className="input-group-text"><i className="bi bi-lock"></i></span>
-                                <input
-                                    type={showPassword2 ? "text" : "password"}
-                                    id="password2"
-                                    className="form-control"
-                                    value={password2}
-                                    onChange={(e) => setPassword2(e.target.value)}
-                                />
-                                <button
-                                    type="button"
-                                    className="btn btn-outline-secondary"
-                                    onClick={() => setShowPassword2(!showPassword2)}
-                                    tabIndex={-1}
-                                >
-                                    <i className={`bi ${showPassword2 ? "bi-eye-slash" : "bi-eye"}`}></i>
-                                </button>
+                            <div className="d-flex justify-content-between">
+                                <button type="submit" className="btn btn-primary">Đăng ký</button>
+                                <button type="button" className="btn btn-secondary" onClick={handleReset}>Xoá thông tin</button>
                             </div>
-                        </div>
-
-                        <div className="d-flex justify-content-between">
-                            <button type="submit" className="btn btn-primary">Đăng ký</button>
-                            <button type="button" className="btn btn-secondary" onClick={handleReset}>Xoá thông tin</button>
-                        </div>
-                    </form>
+                        </form>
+                    </div>
                 </div>
             </div>
-        </div>
+        </>
     );
 }
