@@ -59,7 +59,7 @@ export default function ChiTietPage() {
     });
 
     // Lấy danh sách nhà xuất bản
-    get(ref(db, "NhaXuatBan")).then((snapshot) => {
+    get(ref(db, "NXB")).then((snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.val();
         const map: Record<string, string> = {};
