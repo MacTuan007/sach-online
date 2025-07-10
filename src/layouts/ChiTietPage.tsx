@@ -12,6 +12,8 @@ export default function ChiTietPage() {
   const [relatedBooks, setRelatedBooks] = useState<Sach[]>([]);
   const [chuDeMap, setChuDeMap] = useState<Record<string, string>>({});
   const [nxbMap, setNxbMap] = useState<Record<string, string>>({});
+  const [quantity, setQuantity] = useState(1);
+
 
   // Lấy chi tiết sách theo id
   useEffect(() => {
@@ -85,16 +87,17 @@ export default function ChiTietPage() {
         if (snapshot.exists()) {
           const soLuongHienTai = snapshot.val();
           update(ref(db, `GioHang/${email}`), {
-            [idSach]: soLuongHienTai + 1,
+            [idSach]: soLuongHienTai + quantity, // ✅ cộng thêm số lượng đã chọn
           });
         } else {
-          set(gioHangRef, 1);
+          set(gioHangRef, quantity); // ✅ thêm mới với số lượng đã chọn
         }
       })
       .catch((error) => {
         console.error("Lỗi khi thêm vào giỏ hàng:", error);
       });
   };
+
 
   return (
     <>
@@ -132,8 +135,20 @@ export default function ChiTietPage() {
                       <>{product.giatien?.toLocaleString() || 0} VND</>
                     )}
                   </li>
+                  <li>
+                    <strong>Chọn số lượng:</strong>{" "}
+                    <select
+                      className="form-select d-inline-block w-auto"
+                      value={quantity}
+                      onChange={(e) => setQuantity(Number(e.target.value))}
+                    >
+                      {Array.from({ length: product.soluong }, (_, i) => i + 1).map((num) => (
+                        <option key={num} value={num}>{num}</option>
+                      ))}
+                    </select>
+                    <span className="ms-2 text-muted">(Tối đa {product.soluong})</span>
+                  </li>
 
-                  <li><strong>Số lượng còn:</strong> {product.soluong}</li>
                 </ul>
                 <button
                   className="btn btn-primary mt-3 w-100 w-md-auto"
