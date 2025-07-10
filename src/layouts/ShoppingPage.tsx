@@ -46,7 +46,7 @@ export default function ShoppingPage() {
         });
     }, [emailKey]);
 
-    const handleQuantityChange = (id: string, delta: number) => {
+    const handleQuantityChange = async (id: string, delta: number) => {
         setSachList((prev) =>
             prev.map((sach) => {
                 if (sach.id === id) {
@@ -56,16 +56,23 @@ export default function ShoppingPage() {
                         alert(`Sách "${sach.ten}" chỉ còn ${sach.tonkho} quyển trong kho.`);
                         return sach;
                     }
-
-                    // Cập nhật trên Firebase
-                    update(ref(db, `GioHang/${emailKey}`), { [id]: newVal });
-
                     return { ...sach, soluong: newVal };
                 }
                 return sach;
             })
         );
+
+        try {
+            const sach = sachList.find((s) => s.id === id);
+            if (!sach) return;
+
+            const newVal = sach.soluong + delta;
+            await update(ref(db, `GioHang/${emailKey}`), { [id]: newVal });
+        } catch (error) {
+            console.error("🔥 Không thể cập nhật giỏ hàng:", error);
+        }
     };
+
 
     const handleRemove = (id: string) => {
         remove(ref(db, `GioHang/${emailKey}/${id}`));

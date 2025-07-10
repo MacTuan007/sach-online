@@ -117,7 +117,22 @@ export default function ChiTietPage() {
                   <li><strong>Tác giả:</strong> {product.tacgia}</li>
                   <li><strong>Nhà xuất bản:</strong> {nxbMap[product.nxb] || product.nxb}</li>
                   <li><strong>Chủ đề:</strong> {chuDeMap[product.chude] || product.chude}</li>
-                  <li><strong>Giá:</strong> {product.giatien?.toLocaleString() || 0} VND</li>
+                  <li>
+                    <strong>Giá:</strong>{" "}
+                    {product.khuyenmai && product.khuyenmai > 0 && product.khuyenmai < product.giatien! ? (
+                      <>
+                        <span className="text-muted text-decoration-line-through me-2">
+                          {product.giatien?.toLocaleString()} VND
+                        </span>
+                        <span className="text-danger fw-bold">
+                          {product.khuyenmai.toLocaleString()} VND
+                        </span>
+                      </>
+                    ) : (
+                      <>{product.giatien?.toLocaleString() || 0} VND</>
+                    )}
+                  </li>
+
                   <li><strong>Số lượng còn:</strong> {product.soluong}</li>
                 </ul>
                 <button
@@ -142,21 +157,26 @@ export default function ChiTietPage() {
                 {relatedBooks.length > 0 ? (
                   relatedBooks.map((sach) => (
                     <div className="col-12 col-sm-6 col-md-4 col-lg-3 mb-4" key={sach.id}>
-                      <div className="card h-100 shadow-sm">
-                        <Link to={`/sanpham/${sach.id}`}>
+                      <Link to={`/sanpham/${sach.id}`}>
+                        <div className="card h-100 shadow-sm">
                           <img src={sach.image} className="card-img-top img-fluid" alt={sach.ten} />
-                        </Link>
-                        <div className="card-body d-flex flex-column">
-                          <h5 className="card-title">{sach.ten}</h5>
-                          <p className="card-text text-truncate">{sach.ttnoidung}</p>
-                          <button
-                            className="btn btn-primary mt-auto"
-                            onClick={() => handleAddToCart(sach.id)}
-                          >
-                            Thêm sản phẩm
-                          </button>
+                          <div className="card-body d-flex flex-column">
+                            <h5 className="card-title">{sach.ten}</h5>
+                            <p className="card-text text-truncate">{sach.ttnoidung}</p>
+                            {sach.khuyenmai && sach.khuyenmai > 0 && sach.khuyenmai < sach.giatien! ? (
+                              <p className="text-danger mb-1">
+                                <span className="text-muted text-decoration-line-through me-2">
+                                  {sach.giatien?.toLocaleString()} VND
+                                </span>
+                                {sach.khuyenmai.toLocaleString()} VND
+                              </p>
+                            ) : (
+                              <p className="mb-1">{sach.giatien?.toLocaleString()} VND</p>
+                            )}
+                            <button className="btn btn-primary mt-auto" onClick={() => handleAddToCart(sach.id)}>Thêm sản phẩm</button>
+                          </div>
                         </div>
-                      </div>
+                      </Link>
                     </div>
                   ))
                 ) : (
