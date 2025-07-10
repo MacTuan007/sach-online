@@ -10,6 +10,8 @@ export default function ChiTietPage() {
   const { id } = useParams();
   const [product, setProduct] = useState<Sach | null>(null);
   const [relatedBooks, setRelatedBooks] = useState<Sach[]>([]);
+  const [chuDeMap, setChuDeMap] = useState<Record<string, string>>({});
+  const [nxbMap, setNxbMap] = useState<Record<string, string>>({});
 
   // Lấy chi tiết sách theo id
   useEffect(() => {
@@ -42,6 +44,33 @@ export default function ChiTietPage() {
 
     return () => unsubscribe();
   }, [product]);
+
+  useEffect(() => {
+    // Lấy danh sách chủ đề
+    get(ref(db, "ChuDe")).then((snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        const map: Record<string, string> = {};
+        Object.values(data).forEach((item: any) => {
+          map[item.tenlink] = item.ten;
+        });
+        setChuDeMap(map);
+      }
+    });
+
+    // Lấy danh sách nhà xuất bản
+    get(ref(db, "NhaXuatBan")).then((snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        const map: Record<string, string> = {};
+        Object.values(data).forEach((item: any) => {
+          map[item.tenlink] = item.ten;
+        });
+        setNxbMap(map);
+      }
+    });
+  }, []);
+
 
   const handleAddToCart = (idSach: string) => {
     const email = localStorage.getItem("emailKey");
@@ -86,8 +115,8 @@ export default function ChiTietPage() {
                 <h2 className="fw-bold mb-3">{product.ten}</h2>
                 <ul className="list-unstyled">
                   <li><strong>Tác giả:</strong> {product.tacgia}</li>
-                  <li><strong>Nhà xuất bản:</strong> {product.nxb}</li>
-                  <li><strong>Chủ đề:</strong> {product.chude}</li>
+                  <li><strong>Nhà xuất bản:</strong> {nxbMap[product.nxb] || product.nxb}</li>
+                  <li><strong>Chủ đề:</strong> {chuDeMap[product.chude] || product.chude}</li>
                   <li><strong>Giá:</strong> {product.giatien?.toLocaleString() || 0} VND</li>
                   <li><strong>Số lượng còn:</strong> {product.soluong}</li>
                 </ul>
