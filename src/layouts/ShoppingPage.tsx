@@ -46,32 +46,32 @@ export default function ShoppingPage() {
         });
     }, [emailKey]);
 
-    const handleQuantityChange = async (id: string, delta: number) => {
-        setSachList((prev) =>
-            prev.map((sach) => {
-                if (sach.id === id) {
-                    const newVal = sach.soluong + delta;
-                    if (newVal < 1) return { ...sach, soluong: 1 };
-                    if (sach.tonkho !== undefined && newVal > sach.tonkho) {
-                        alert(`Sách "${sach.ten}" chỉ còn ${sach.tonkho} quyển trong kho.`);
-                        return sach;
-                    }
-                    return { ...sach, soluong: newVal };
-                }
-                return sach;
-            })
-        );
+    // const handleQuantityChange = async (id: string, delta: number) => {
+    //     setSachList((prev) =>
+    //         prev.map((sach) => {
+    //             if (sach.id === id) {
+    //                 const newVal = sach.soluong + delta;
+    //                 if (newVal < 1) return { ...sach, soluong: 1 };
+    //                 if (sach.tonkho !== undefined && newVal > sach.tonkho) {
+    //                     alert(`Sách "${sach.ten}" chỉ còn ${sach.tonkho} quyển trong kho.`);
+    //                     return sach;
+    //                 }
+    //                 return { ...sach, soluong: newVal };
+    //             }
+    //             return sach;
+    //         })
+    //     );
 
-        try {
-            const sach = sachList.find((s) => s.id === id);
-            if (!sach) return;
+    //     try {
+    //         const sach = sachList.find((s) => s.id === id);
+    //         if (!sach) return;
 
-            const newVal = sach.soluong + delta;
-            await update(ref(db, `GioHang/${emailKey}`), { [id]: newVal });
-        } catch (error) {
-            console.error("🔥 Không thể cập nhật giỏ hàng:", error);
-        }
-    };
+    //         const newVal = sach.soluong + delta;
+    //         await update(ref(db, `GioHang/${emailKey}`), { [id]: newVal });
+    //     } catch (error) {
+    //         console.error("🔥 Không thể cập nhật giỏ hàng:", error);
+    //     }
+    // };
 
 
     const handleRemove = (id: string) => {
