@@ -34,7 +34,7 @@ export default function Sidebar() {
                     </Link>
                 </li>
                 <li className="nav-item">
-                    <button className="btn btn-link nav-link" onClick={handleLogout}>
+                    <button className="btn btn-link nav-link text-white" onClick={handleLogout}>
                         Đăng xuất
                     </button>
                 </li>
