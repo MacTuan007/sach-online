@@ -61,9 +61,21 @@ export default function DangKy() {
             return snapshot.exists();
         };
 
-        const exists = await checkUsernameExists(khachhang.username);
-        if (exists) {
+
+        const checkEmailExists = async (email: string): Promise<boolean> => {
+            const q = query(ref(db, 'KhachHang'), orderByChild('email'), equalTo(email));
+            const snapshot = await get(q);
+            return snapshot.exists();
+        };
+
+        const usernameexists = await checkUsernameExists(khachhang.username);
+        if (usernameexists) {
             setError("Tên đăng nhập đã tồn tại!");
+            return;
+        }
+        const emailexists = await checkEmailExists(khachhang.email);
+        if (emailexists) {
+            setError("Email đã được sử dụng!");
             return;
         }
 
