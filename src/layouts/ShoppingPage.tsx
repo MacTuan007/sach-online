@@ -10,11 +10,11 @@ export default function ShoppingPage() {
     const [sachList, setSachList] = useState<Sach[]>([]);
     const emailKey = localStorage.getItem('emailKey');
     useEffect(() => {
-
         if (!emailKey) {
             navigate('/DangNhap');
             return;
         }
+
         const cartRef = ref(db, `GioHang/${emailKey}`);
         get(cartRef).then(async (snapshot) => {
             const gioHangData = snapshot.val();
@@ -28,50 +28,31 @@ export default function ShoppingPage() {
                 const sachSnap = await get(ref(db, `Sach/${id}`));
                 const sach = sachSnap.val();
                 if (sach) {
+                    const tonkho = sach.soluong;
+                    let slTrongGio = gioHangData[id];
+
+                    // Nếu số lượng trong giỏ lớn hơn tồn kho thì cập nhật lại Firebase và gán về tồn kho
+                    if (slTrongGio > tonkho) {
+                        slTrongGio = tonkho;
+                        await update(ref(db, `GioHang/${emailKey}`), {
+                            [id]: tonkho,
+                        });
+                    }
+
                     return {
                         id,
                         ...sach,
-                        soluong: gioHangData[id]
+                        tonkho,            // lưu tồn kho thật
+                        soluong: slTrongGio // số lượng hợp lệ
                     } as Sach;
                 }
                 return null;
             });
 
             const sachList = (await Promise.all(sachPromises)).filter(Boolean) as Sach[];
-            setSachList(sachList.map(s => ({
-                ...s,
-                tonkho: s.soluong, // giữ lại tồn kho thực tế
-                soluong: gioHangData[s.id] // số lượng trong giỏ hàng
-            })));
+            setSachList(sachList);
         });
     }, [emailKey]);
-
-    // const handleQuantityChange = async (id: string, delta: number) => {
-    //     setSachList((prev) =>
-    //         prev.map((sach) => {
-    //             if (sach.id === id) {
-    //                 const newVal = sach.soluong + delta;
-    //                 if (newVal < 1) return { ...sach, soluong: 1 };
-    //                 if (sach.tonkho !== undefined && newVal > sach.tonkho) {
-    //                     alert(`Sách "${sach.ten}" chỉ còn ${sach.tonkho} quyển trong kho.`);
-    //                     return sach;
-    //                 }
-    //                 return { ...sach, soluong: newVal };
-    //             }
-    //             return sach;
-    //         })
-    //     );
-
-    //     try {
-    //         const sach = sachList.find((s) => s.id === id);
-    //         if (!sach) return;
-
-    //         const newVal = sach.soluong + delta;
-    //         await update(ref(db, `GioHang/${emailKey}`), { [id]: newVal });
-    //     } catch (error) {
-    //         console.error("🔥 Không thể cập nhật giỏ hàng:", error);
-    //     }
-    // };
 
 
     const handleRemove = (id: string) => {
