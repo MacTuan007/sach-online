@@ -37,7 +37,7 @@ export default function DangNhap() {
             const isMatch = await bcrypt.compare(khachhang.password, Admin.password);
             if (isMatch) {
                 localStorage.setItem('admin', 'true');
-                navigate('/admin');
+                navigate('/Admin');
                 return;
             }
             else {

@@ -38,33 +38,49 @@ export default function ShoppingPage() {
             });
 
             const sachList = (await Promise.all(sachPromises)).filter(Boolean) as Sach[];
-            setSachList(sachList);
+            setSachList(sachList.map(s => ({
+                ...s,
+                tonkho: s.soluong, // giữ lại tồn kho thực tế
+                soluong: gioHangData[s.id] // số lượng trong giỏ hàng
+            })));
         });
     }, [emailKey]);
 
     const handleQuantityChange = (id: string, delta: number) => {
         setSachList((prev) =>
-            prev.map((sach) =>
-                sach.id === id
-                    ? { ...sach, soluong: Math.max(1, sach.soluong + delta) }
-                    : sach
-            )
+            prev.map((sach) => {
+                if (sach.id === id) {
+                    const newVal = sach.soluong + delta;
+                    if (newVal < 1) return { ...sach, soluong: 1 };
+                    if (sach.tonkho !== undefined && newVal > sach.tonkho) {
+                        alert(`Sách "${sach.ten}" chỉ còn ${sach.tonkho} quyển trong kho.`);
+                        return sach;
+                    }
+
+                    // Cập nhật trên Firebase
+                    update(ref(db, `GioHang/${emailKey}`), { [id]: newVal });
+
+                    return { ...sach, soluong: newVal };
+                }
+                return sach;
+            })
         );
-        const itemRef = ref(db, `GioHang/${emailKey}/${id}`);
-        get(itemRef).then((snap) => {
-            const old = snap.val();
-            const newVal = Math.max(1, old + delta);
-            update(ref(db, `GioHang/${emailKey}`), { [id]: newVal });
-        });
     };
+
     const handleRemove = (id: string) => {
         remove(ref(db, `GioHang/${emailKey}/${id}`));
         setSachList((prev) => prev.filter((s) => s.id !== id));
     };
 
     const handleConfirm = async () => {
-        const totalAmount = sachList.reduce((total, item) => total + item.giatien * item.soluong, 0);
+        for (const item of sachList) {
+            if (item.tonkho !== undefined && item.soluong > item.tonkho) {
+                alert(`Sách "${item.ten}" chỉ còn ${item.tonkho} quyển. Vui lòng giảm số lượng.`);
+                return;
+            }
+        }
 
+        const totalAmount = sachList.reduce((total, item) => total + item.giatien * item.soluong, 0);
         try {
             const response = await fetch('https://sach-online.onrender.com/create_payment', {
                 method: 'POST',
@@ -109,6 +125,7 @@ export default function ShoppingPage() {
                                         <th className="d-none d-md-table-cell">Hình ảnh</th>
                                         <th>Số lượng</th>
                                         <th>Giá tiền</th>
+                                        <th>Giá khuyến mãi</th>
                                         <th>Thành tiền</th>
                                         <th className="d-none d-md-table-cell">Thao tác</th>
                                     </tr>
@@ -138,13 +155,22 @@ export default function ShoppingPage() {
                                                     <button
                                                         className="btn btn-sm btn-outline-secondary"
                                                         onClick={() => handleQuantityChange(sach.id, 1)}
+                                                        disabled={sach.tonkho !== undefined && sach.soluong >= sach.tonkho}
                                                     >
                                                         +
                                                     </button>
+
                                                 </div>
                                             </td>
                                             <td className="text-end">{sach.giatien.toLocaleString()} ₫</td>
-                                            <td className="text-end">{(sach.giatien * sach.soluong).toLocaleString()} ₫</td>
+                                            <td className="text-end">
+                                                {sach.khuyenmai
+                                                    ? <span className="text-danger fw-bold">{sach.khuyenmai.toLocaleString()} ₫</span>
+                                                    : <span className="text-muted">—</span>}
+                                            </td>
+                                            <td className="text-end">
+                                                {((sach.khuyenmai ?? sach.giatien) * sach.soluong).toLocaleString()} ₫
+                                            </td>
                                             <td className="text-center d-none d-md-table-cell">
                                                 <button
                                                     className="btn btn-sm btn-danger"
@@ -159,7 +185,10 @@ export default function ShoppingPage() {
                                     <tr>
                                         <td colSpan={3} className="text-end fw-bold">Tổng cộng:</td>
                                         <td className="text-end fw-bold" colSpan={2}>
-                                            {sachList.reduce((total, item) => total + item.giatien * item.soluong, 0).toLocaleString()} ₫
+                                            {sachList.reduce((total, item) => {
+                                                const price = item.khuyenmai ?? item.giatien;
+                                                return total + price * item.soluong;
+                                            }, 0).toLocaleString()} ₫
                                         </td>
                                     </tr>
                                 </tbody>

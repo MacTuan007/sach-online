@@ -117,6 +117,10 @@ export default function SachModal({ show, onClose, onSave, initSach, isEdit }: P
             <Form.Control type="number" name="giatien" value={sach.giatien} onChange={handleChange} />
           </Form.Group>
           <Form.Group className="mb-2">
+            <Form.Label>Giá tiền khuyến mãi</Form.Label>
+            <Form.Control type="number" name="khuyenmai" value={sach.khuyenmai} onChange={handleChange} />
+          </Form.Group>
+          <Form.Group className="mb-2">
             <Form.Label>Nhà xuất bản</Form.Label>
             <Form.Select name="nxb" value={sach.nxb} onChange={handleDropdownChange}>
               <option value="">-- Chọn NXB --</option>
