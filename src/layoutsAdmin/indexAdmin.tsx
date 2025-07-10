@@ -28,14 +28,14 @@ export default function IndexAdmin() {
 
     useEffect(() => {
         const fetchData = async () => {
-            const snapshot = await get(ref(db));
-            const dbData = snapshot.val();
+            const khachHangSnap = await get(ref(db, "KhachHang"));
+            const lichSuSnap = await get(ref(db, "LichSuGiaoDich"));
+            const sachSnap = await get(ref(db, "Sach"));
 
-            const khachHangRaw = dbData.KhachHang || {};
-            const sachData = dbData.Sach || {};
-            const lichSu = dbData.LichSuGiaoDich || {};
+            const khachHangRaw = khachHangSnap.val() || {};
+            const lichSu = lichSuSnap.val() || {};
+            const sachData = sachSnap.val() || {};
 
-            // ⚠️ Normalize email để map tên người dùng đúng với key trong LichSuGiaoDich
             const khachHangMap: Record<string, string> = {};
             Object.values(khachHangRaw).forEach((val: any) => {
                 const emailKey = val.email.replace(/[^a-zA-Z0-9]/g, "");
